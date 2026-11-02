@@ -43,6 +43,18 @@ apt-get update -y >/dev/null 2>&1
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
     php-fpm php-cli php-json php-curl nginx curl jq >/dev/null 2>&1
 
+# --- kesan versi php-fpm (Debian/Ubuntu: php8.2-fpm, bukan php-fpm) ---
+PHP_FPM_SVC=$(systemctl list-unit-files --no-legend 2>/dev/null | awk '$1 ~ /^php[0-9.]+-fpm\.service$/ {print $1; exit}')
+PHP_FPM_SOCK=$(ls /run/php/php*-fpm.sock 2>/dev/null | head -1)
+[[ -z "$PHP_FPM_SVC" ]] && PHP_FPM_SVC=$(ls /lib/systemd/system/php*-fpm.service 2>/dev/null | head -1 | xargs -r basename)
+if [[ -z "$PHP_FPM_SVC" ]]; then
+  PHP_FPM_SVC="php-fpm"
+fi
+if [[ -z "$PHP_FPM_SOCK" ]]; then
+  PHP_FPM_SOCK="/run/php/php-fpm.sock"
+fi
+info "PHP-FPM: ${PHP_FPM_SVC} (${PHP_FPM_SOCK})"
+
 # --- layout ---
 info "Menyediakan direktori panel..."
 mkdir -p "${PUBLIC_DIR}"
@@ -98,7 +110,7 @@ server {
     }
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php-fpm.sock;
+        fastcgi_pass unix:${PHP_FPM_SOCK};
     }
 
     # static
@@ -120,7 +132,8 @@ if systemctl is-active --quiet nginx; then
 else
   systemctl enable --now nginx >/dev/null 2>&1 || nginx
 fi
-systemctl enable --now php*-fpm >/dev/null 2>&1 || systemctl restart php-fpm
+# Start the detected php-fpm service (falls back to the versioned name).
+systemctl enable --now "${PHP_FPM_SVC}" >/dev/null 2>&1 || systemctl restart "${PHP_FPM_SVC}" >/dev/null 2>&1 || true
 
 ok "Panel dipasang."
 echo ""
