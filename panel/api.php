@@ -237,7 +237,19 @@ case 'account_create': {
             log_action("create ssh $user ($days days)");
             out(['ok'=>true,'user'=>$user,'exp'=>trim(sh("chage -l \"$user\" | grep 'Account expires' | cut -d: -f2-"))]);
         }
-        case 'xray': case 'v2ray': case 'ss': case 'wireguard': case 'trojan':
+        case 'xray': case 'v2ray': {
+            try { $r = xray_create($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'user'=>$user,'exp'=>$r['exp'],'uuid'=>$r['uuid']]);
+        }
+        case 'ss': case 'shadowsocks': {
+            try { $r = ss_create($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'user'=>$user,'exp'=>$r['exp'],'ports'=>$r['ports']]);
+        }
+        case 'wireguard': case 'wg': {
+            try { $r = wg_create($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'user'=>$user,'exp'=>$r['exp'],'conf'=>$r['conf']]);
+        }
+        case 'trojan': case 'sstp': case 'l2tp': case 'pptp':
             fail('Pengurusan ' . strtoupper($svc) . ' belum didayakan dalam API — guna CLI buat masa ini', 501);
         default:
             fail('Servis tidak dikenali', 400);
@@ -258,8 +270,22 @@ case 'account_delete': {
             log_action("delete ssh $user");
             out(['ok'=>true]);
         }
-        default:
+        case 'xray': case 'v2ray': {
+            try { xray_delete($user); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true]);
+        }
+        case 'ss': case 'shadowsocks': {
+            try { ss_delete($user); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true]);
+        }
+        case 'wireguard': case 'wg': {
+            try { wg_delete($user); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true]);
+        }
+        case 'trojan': case 'sstp': case 'l2tp': case 'pptp':
             fail('Pengurusan ' . strtoupper($svc) . ' belum didayakan dalam API — guna CLI buat masa ini', 501);
+        default:
+            fail('Servis tidak dikenali', 400);
     }
 }
 
@@ -275,8 +301,22 @@ case 'account_renew': {
             log_action("renew ssh $user (+$days days)");
             out(['ok'=>true,'exp'=>trim(sh("chage -l \"$user\" | grep 'Account expires' | cut -d: -f2-"))]);
         }
-        default:
+        case 'xray': case 'v2ray': {
+            try { $exp = xray_renew($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'exp'=>$exp]);
+        }
+        case 'ss': case 'shadowsocks': {
+            try { $exp = ss_renew($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'exp'=>$exp]);
+        }
+        case 'wireguard': case 'wg': {
+            try { $exp = wg_renew($user, $days); } catch (Throwable $e) { fail($e->getMessage()); }
+            out(['ok'=>true,'exp'=>$exp]);
+        }
+        case 'trojan': case 'sstp': case 'l2tp': case 'pptp':
             fail('Pengurusan ' . strtoupper($svc) . ' belum didayakan dalam API — guna CLI buat masa ini', 501);
+        default:
+            fail('Servis tidak dikenali', 400);
     }
 }
 
@@ -343,21 +383,48 @@ function ssh_accounts(): array {
     return $res;
 }
 
+function exp_meta(string $exp): array {
+    // $exp is YYYY-MM-DD (or 'never' / empty). Returns [exp_display, days_left|null].
+    if ($exp === '' || $exp === 'never' || $exp === 'Lifetime') return ['Lifetime', null];
+    $ts = strtotime($exp);
+    if ($ts === false) return [$exp, null];
+    return [$exp, max(0, (int)round(($ts - time()) / 86400))];
+}
+
+function xray_config_file(): string {
+    // xray core -> /etc/xray/config.json ; v2ray -> /etc/v2ray/config.json
+    $core = trim(sh("cat /root/log-install.txt 2>/dev/null | grep -ow 'XRAY' | sort -u | head -1"));
+    $path = $core === 'XRAY' ? '/etc/xray/config.json' : '/etc/v2ray/config.json';
+    if (!is_file($path) && is_file('/etc/xray/config.json')) $path = '/etc/xray/config.json';
+    if (!is_file($path) && is_file('/etc/v2ray/config.json')) $path = '/etc/v2ray/config.json';
+    return $path;
+}
+
+function xray_core(): string {
+    return strpos(xray_config_file(), '/xray/') !== false ? 'xray' : 'v2ray';
+}
+
 function xray_accounts(): array {
-    // read email field from xray/v2ray config clients
-    $files = ['/etc/xray/config.json', '/etc/v2ray/config.json'];
+    // read email field from xray/v2ray config clients + expiry from ### markers
+    $cfg = xray_config_file();
+    if (!is_file($cfg)) return [];
+    $json = @json_decode((string)@file_get_contents($cfg), true);
+    $expiry = [];
+    foreach (explode("\n", (string)@file_get_contents($cfg)) as $ln) {
+        if (preg_match('/^###\s+(\S+)\s+(\d{4}-\d{2}-\d{2})/', $ln, $m)) {
+            $expiry[$m[1]] = $m[2];
+        }
+    }
     $res = [];
-    foreach ($files as $path) {
-        if (!is_file($path)) continue;
-        $json = @json_decode((string)@file_get_contents($path), true);
-        if (!is_array($json)) continue;
+    if (is_array($json)) {
         $inbounds = $json['inbounds'] ?? [];
         foreach ($inbounds as $ib) {
-            $settings = $ib['settings'] ?? [];
-            $clients = $settings['clients'] ?? [];
+            $clients = ($ib['settings']['clients'] ?? []);
             foreach ($clients as $c) {
                 $email = $c['email'] ?? '';
-                if ($email !== '' && !isset($res[$email])) $res[$email] = ['user'=>$email,'exp'=>'—','days'=>null,'quota'=>0,'used'=>'—','online'=>false];
+                if ($email === '' || isset($res[$email])) continue;
+                [$expD, $days] = exp_meta($expiry[$email] ?? '');
+                $res[$email] = ['user'=>$email,'exp'=>$expD,'days'=>$days,'quota'=>0,'used'=>'—','online'=>false];
             }
         }
     }
@@ -367,12 +434,11 @@ function xray_accounts(): array {
 function ss_accounts(): array {
     $conf = '/etc/shadowsocks-libev/akun.conf';
     $res = [];
-    if (is_file($conf)) {
-        foreach (explode("\n", (string)@file_get_contents($conf)) as $ln) {
-            $ln = trim($ln);
-            if ($ln === '' || $ln[0] === '#') continue;
-            $p = preg_split('/\s+/', $ln);
-            if (count($p) >= 2) $res[] = ['user'=>$p[1] ?? $p[0], 'exp'=>'—','days'=>null,'quota'=>0,'used'=>'—','online'=>false];
+    if (!is_file($conf)) return $res;
+    foreach (explode("\n", (string)@file_get_contents($conf)) as $ln) {
+        if (preg_match('/^###\s+(\S+)\s+(\d{4}-\d{2}-\d{2})/', $ln, $m)) {
+            [$expD, $days] = exp_meta($m[2]);
+            $res[] = ['user'=>$m[1],'exp'=>$expD,'days'=>$days,'quota'=>0,'used'=>'—','online'=>false];
         }
     }
     return $res;
@@ -381,15 +447,11 @@ function ss_accounts(): array {
 function wg_accounts(): array {
     $res = [];
     $conf = '/etc/wireguard/wg0.conf';
-    if (is_file($conf)) {
-        $cur = '';
-        foreach (explode("\n", (string)@file_get_contents($conf)) as $ln) {
-            if (preg_match('/^\[Peer\]/', $ln)) { $cur = ''; continue; }
-            if (preg_match('/^#\s*(\S+)/', $ln, $m)) { $cur = $m[1]; continue; }
-            if (preg_match('/^PublicKey\s*=\s*(\S+)/', $ln, $m) && $cur !== '') {
-                $res[] = ['user'=>$cur,'exp'=>'—','days'=>null,'quota'=>0,'used'=>'—','online'=>false];
-                $cur = '';
-            }
+    if (!is_file($conf)) return $res;
+    foreach (explode("\n", (string)@file_get_contents($conf)) as $ln) {
+        if (preg_match('/^###\s+Client\s+(\S+)\s+(\d{4}-\d{2}-\d{2})/', $ln, $m)) {
+            [$expD, $days] = exp_meta($m[2]);
+            $res[] = ['user'=>$m[1],'exp'=>$expD,'days'=>$days,'quota'=>0,'used'=>'—','online'=>false];
         }
     }
     return $res;
@@ -407,4 +469,186 @@ function list_accounts(string $svc): array {
 
 function log_action(string $msg): void {
     @file_put_contents('/etc/log-create-user.log', '[' . date('Y-m-d H:i:s') . "] [PANEL] $msg\n", FILE_APPEND);
+}
+
+// ============ account management (mirrors the CLI scripts' exact commands) ============
+function safe_user(string $u): string {
+    if (!preg_match('/^[A-Za-z0-9._-]{1,32}$/', $u)) throw new Exception('Username tidak sah');
+    return $u;
+}
+
+// ---- Xray / V2ray (VMess, WS) ----
+function xray_create(string $user, int $days): array {
+    $user = safe_user($user);
+    $cfg = xray_config_file();
+    if (!is_file($cfg)) throw new Exception('Config ' . $cfg . ' tidak wujud');
+    $core = xray_core();
+    if (trim(sh("grep -w '$user' '$cfg' | wc -l")) !== '0') throw new Exception('User sudah wujud');
+
+    $exp = date('Y-m-d', time() + $days * 86400);
+    $uuid = trim(sh('cat /proc/sys/kernel/random/uuid'));
+    if ($uuid === '') $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff), random_int(0,0xffff));
+
+    // insert a marker + client object after each vmess marker (same result as the CLI sed)
+    $text = (string)@file_get_contents($cfg);
+    $block = "### $user $exp\n},{\"id\": \"$uuid\",\"alterId\": \"0\",\"email\": \"$user\"";
+    $text = insert_after_marker($text, '#vmessWSTLS', $block);
+    $text = insert_after_marker($text, '#vmessWS', $block);
+    @file_put_contents($cfg, $text);
+    sh("systemctl restart $core 2>/dev/null");
+    sh('service cron restart 2>/dev/null');
+    log_action("create $core vmess $user ($days days)");
+    return ['exp'=>$exp, 'uuid'=>$uuid];
+}
+
+// Insert $block on the line immediately after the last line matching $marker.
+function insert_after_marker(string $text, string $marker, string $block): string {
+    $lines = explode("\n", $text);
+    $idx = -1;
+    foreach ($lines as $i => $ln) {
+        if (preg_match('/' . preg_quote($marker, '/') . '\s*$/', $ln)) $idx = $i;
+    }
+    if ($idx === -1) return $text; // marker absent -> leave unchanged (no vmess on this build)
+    array_splice($lines, $idx + 1, 0, explode("\n", $block));
+    return implode("\n", $lines);
+}
+
+function xray_delete(string $user): void {
+    $user = safe_user($user);
+    $cfg = xray_config_file();
+    $exp = trim(sh("grep -wE '^### $user ' \"$cfg\" | cut -d ' ' -f 3 | sort | uniq | head -1"));
+    if ($exp === '') throw new Exception('User tidak dijumpai');
+    sh("sed -i \"/^### $user $exp/,/^},{/d\" \"$cfg\"");
+    sh('systemctl restart ' . xray_core() . ' 2>/dev/null');
+    log_action("delete xray $user");
+}
+
+function xray_renew(string $user, int $days): string {
+    $user = safe_user($user);
+    $cfg = xray_config_file();
+    $exp = trim(sh("grep -wE '^### $user ' \"$cfg\" | cut -d ' ' -f 3 | sort | uniq | head -1"));
+    if ($exp === '') throw new Exception('User tidak dijumpai');
+    $newExp = date('Y-m-d', time() + $days * 86400);
+    sh("sed -i \"s|^### $user .*|### $user $newExp|\" \"$cfg\"");
+    sh('systemctl restart ' . xray_core() . ' 2>/dev/null');
+    log_action("renew xray $user (+$days days)");
+    return $newExp;
+}
+
+// ---- Shadowsocks (obfs) ----
+function ss_create(string $user, int $days): array {
+    $user = safe_user($user);
+    $conf = '/etc/shadowsocks-libev/akun.conf';
+    $dir = '/etc/shadowsocks-libev';
+    if (!is_dir($dir)) throw new Exception('Shadowsocks tidak dipasang');
+    if (trim(sh("grep -w '$user' '$conf' | wc -l")) !== '0') throw new Exception('User sudah wujud');
+
+    $exp = date('Y-m-d', time() + $days * 86400);
+    $ip = trim((string)@file_get_contents('/etc/myipvps'));
+    if ($ip === '') $ip = trim(sh('curl -sS --max-time 5 ifconfig.me'));
+
+    $lastTls = (int)trim(sh("grep 'port_tls' '$conf' | tail -n1 | awk '{print $2}'"));
+    $lastHttp = (int)trim(sh("grep 'port_http' '$conf' | tail -n1 | awk '{print $2}'"));
+    if ($lastTls === 0) {
+        // default base ports from install log
+        $lastTls = (int)trim(sh("cat /root/log-install.txt 2>/dev/null | grep -w 'Shadowsocks' | grep -oE ':[0-9]+' | head -1 | tr -d ':'"));
+        $lastHttp = $lastTls;
+    }
+    $tls = $lastTls + 1;
+    $http = $lastHttp + 1;
+
+    // write per-user configs
+    $tlsJson = "{\n  \"server\":\"0.0.0.0\",\n  \"server_port\":$tls,\n  \"password\":\"$user\",\n  \"timeout\":60,\n  \"method\":\"aes-256-cfb\",\n  \"fast_open\":true,\n  \"no_delay\":true,\n  \"mode\":\"tcp_and_udp\",\n  \"plugin\":\"obfs-server\",\n  \"plugin_opts\":\"obfs=tls\"\n}\n";
+    $httpJson = "{\n  \"server\":\"0.0.0.0\",\n  \"server_port\":$http,\n  \"password\":\"$user\",\n  \"timeout\":60,\n  \"method\":\"aes-256-cfb\",\n  \"fast_open\":true,\n  \"no_delay\":true,\n  \"mode\":\"tcp_and_udp\",\n  \"plugin\":\"obfs-server\",\n  \"plugin_opts\":\"obfs=http\"\n}\n";
+    @file_put_contents("$dir/$user-tls.json", $tlsJson);
+    @file_put_contents("$dir/$user-http.json", $httpJson);
+    @chmod("$dir/$user-tls.json", 0755);
+    @chmod("$dir/$user-http.json", 0755);
+
+    sh("systemctl enable --now shadowsocks-libev-server@$user-tls.service 2>/dev/null");
+    sh("systemctl enable --now shadowsocks-libev-server@$user-http.service 2>/dev/null");
+
+    @file_put_contents($conf, "### $user $exp\nport_tls $tls\nport_http $http\n", FILE_APPEND);
+    log_action("create ss $user ($days days, $tls/$http)");
+    return ['exp'=>$exp, 'ports'=>['tls'=>$tls, 'http'=>$http]];
+}
+
+function ss_delete(string $user): void {
+    $user = safe_user($user);
+    $conf = '/etc/shadowsocks-libev/akun.conf';
+    $exp = trim(sh("grep -wE '^### $user ' '$conf' | cut -d ' ' -f 3 | head -1"));
+    if ($exp === '') throw new Exception('User tidak dijumpai');
+    sh("sed -i \"/^### $user $exp/,/^port_http/d\" \"$conf\"");
+    sh("systemctl disable --now shadowsocks-libev-server@$user-tls.service 2>/dev/null");
+    sh("systemctl disable --now shadowsocks-libev-server@$user-http.service 2>/dev/null");
+    @unlink("/etc/shadowsocks-libev/$user-tls.json");
+    @unlink("/etc/shadowsocks-libev/$user-http.json");
+    log_action("delete ss $user");
+}
+
+function ss_renew(string $user, int $days): string {
+    $user = safe_user($user);
+    $conf = '/etc/shadowsocks-libev/akun.conf';
+    if (trim(sh("grep -wE '^### $user ' '$conf' | wc -l")) === '0') throw new Exception('User tidak dijumpai');
+    $newExp = date('Y-m-d', time() + $days * 86400);
+    sh("sed -i \"s|^### $user .*|### $user $newExp|\" \"$conf\"");
+    log_action("renew ss $user (+$days days)");
+    return $newExp;
+}
+
+// ---- Wireguard ----
+function wg_create(string $user, int $days): array {
+    $user = safe_user($user);
+    $conf = '/etc/wireguard/wg0.conf';
+    if (!is_file($conf)) throw new Exception('Wireguard tidak dipasang');
+    if (trim(sh("grep -w '$user' '$conf' | wc -l")) !== '0') throw new Exception('User sudah wujud');
+
+    $exp = date('Y-m-d', time() + $days * 86400);
+    $ip = trim((string)@file_get_contents('/etc/myipvps'));
+    if ($ip === '') $ip = trim(sh('curl -sS --max-time 5 ifconfig.me'));
+
+    $serverPub = trim(sh("grep '^PublicKey' /etc/wireguard/publickey 2>/dev/null || wg show wg0 public-key 2>/dev/null"));
+    $port = trim(sh("grep 'ListenPort' '$conf' | head -1 | awk '{print $3}'"));
+    if ($port === '') $port = '51820';
+
+    $lastOct = (int)trim(sh("grep '/32' '$conf' | tail -n1 | awk '{print $3}' | cut -d'/' -f1 | cut -d'.' -f4"));
+    $addr = '10.66.66.' . ($lastOct >= 2 ? $lastOct + 1 : 2);
+
+    $priv = trim(sh('wg genkey'));
+    $pub = trim(sh("echo '$priv' | wg pubkey"));
+    $psk = trim(sh('wg genpsk'));
+    if ($priv === '' || $pub === '') throw new Exception('Gagal jana key wireguard');
+
+    @file_put_contents($conf,
+        "### Client $user $exp\n[Peer]\nPublicKey = $pub\nPresharedKey = $psk\nAllowedIPs = $addr/32\n",
+        FILE_APPEND);
+
+    $client = "[Interface]\nPrivateKey = $priv\nAddress = $addr/24\nDNS = 176.103.130.130,176.103.130.131\n\n[Peer]\nPublicKey = $serverPub\nPresharedKey = $psk\nEndpoint = $ip:$port\nAllowedIPs = 0.0.0.0/0,::/0\n";
+    @mkdir('/home/vps/public_html', 0755, true);
+    @file_put_contents("/home/vps/public_html/$user.conf", $client);
+
+    sh('systemctl restart wg-quick@wg0 2>/dev/null');
+    log_action("create wg $user ($days days, $addr)");
+    return ['exp'=>$exp, 'conf'=>"/home/vps/public_html/$user.conf"];
+}
+
+function wg_delete(string $user): void {
+    $user = safe_user($user);
+    $conf = '/etc/wireguard/wg0.conf';
+    $exp = trim(sh("grep -wE '^### Client $user ' '$conf' | cut -d ' ' -f 4 | head -1"));
+    if ($exp === '') throw new Exception('User tidak dijumpai');
+    sh("sed -i \"/^### Client $user $exp/,/^AllowedIPs/d\" \"$conf\"");
+    @unlink("/home/vps/public_html/$user.conf");
+    sh('systemctl restart wg-quick@wg0 2>/dev/null');
+    log_action("delete wg $user");
+}
+
+function wg_renew(string $user, int $days): string {
+    $user = safe_user($user);
+    $conf = '/etc/wireguard/wg0.conf';
+    if (trim(sh("grep -wE '^### Client $user ' '$conf' | wc -l")) === '0') throw new Exception('User tidak dijumpai');
+    $newExp = date('Y-m-d', time() + $days * 86400);
+    sh("sed -i \"s|^### Client $user .*|### Client $user $newExp|\" \"$conf\"");
+    log_action("renew wg $user (+$days days)");
+    return $newExp;
 }

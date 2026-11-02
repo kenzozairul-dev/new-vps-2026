@@ -1271,18 +1271,26 @@
     }, true);
 
     var addUserBtn = $('#addUserBtn');
+    var SVCS_MANAGED = { ssh: 'ssh', xray: 'xray', trojan: 'xray', wireguard: 'wireguard', ss: 'ss', shadowsocks: 'ss' };
     addUserBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (activeService !== 'ssh') {
-        toast('Tambah user hanya untuk SSH buat masa ini (servis lain guna CLI)', 'warn');
+      var svcKey = SVCS_MANAGED[activeService];
+      if (!svcKey) {
+        toast('Tambah user untuk ' + activeService + ' belum disokong (guna CLI)', 'warn');
         return;
       }
-      var user = window.prompt('Username SSH baru:');
+      var user = window.prompt('Username baru (' + svcKey + '):');
       if (!user) return;
       var days = parseInt(window.prompt('Tempoh (hari):', '30'), 10) || 30;
-      API.createAccount('ssh', { user: user, days: days }).then(function (r) {
-        toast('User ' + r.user + ' dicipta · tamat ' + (r.exp || days + 'd'), 'info');
-        API.accounts('ssh').then(function (res) { applyAccounts('ssh', res.accounts); });
+      var payload = { user: user, days: days };
+      if (svcKey === 'ssh') {
+        var pw = window.prompt('Password (kosong = auto):', '');
+        if (pw) payload.password = pw;
+      }
+      API.createAccount(svcKey, payload).then(function (r) {
+        var extra = svcKey === 'ss' && r.ports ? ' · port ' + r.ports.tls + '/' + r.ports.http : '';
+        toast('User ' + r.user + ' dicipta · tamat ' + (r.exp || days + 'd') + extra, 'info');
+        API.accounts(svcKey).then(function (res) { applyAccounts(svcKey, res.accounts); });
       }).catch(function (err) { toast(err.message, 'warn'); });
     }, true);
 
