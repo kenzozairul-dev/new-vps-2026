@@ -1,3 +1,10 @@
+# 02-11-2026
+* new auto-update engine (3.1)
+* panel update dengan UI baru (3.1)
+* semakan versi pantas + changelog preview (3.1)
+* fix semakan permission pada install baru (3.1)
+* semua URL raw kini guna repo sendiri (3.1)
+
 # 06-11-2021
 * fix bug (3.0)
 * fix port squid (3.0)
