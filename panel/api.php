@@ -405,30 +405,31 @@ function xray_core(): string {
 }
 
 function xray_accounts(): array {
-    // read email field from xray/v2ray config clients + expiry from ### markers
+    // config.json contains `### user date` comment lines which make it invalid JSON,
+    // so parse directly from the raw text instead of json_decode.
     $cfg = xray_config_file();
     if (!is_file($cfg)) return [];
-    $json = @json_decode((string)@file_get_contents($cfg), true);
-    $expiry = [];
-    foreach (explode("\n", (string)@file_get_contents($cfg)) as $ln) {
-        if (preg_match('/^###\s+(\S+)\s+(\d{4}-\d{2}-\d{2})/', $ln, $m)) {
-            $expiry[$m[1]] = $m[2];
+    $raw = (string)@file_get_contents($cfg);
+
+    // primary: `### user date` markers (what the CLI scripts write)
+    $byUser = [];
+    if (preg_match_all('/^###\s+(\S+)\s+(\d{4}-\d{2}-\d{2})/m', $raw, $mm, PREG_SET_ORDER)) {
+        foreach ($mm as $m) {
+            if (isset($byUser[$m[1]])) continue;
+            [$expD, $days] = exp_meta($m[2]);
+            $byUser[$m[1]] = ['user'=>$m[1],'exp'=>$expD,'days'=>$days,'quota'=>0,'used'=>'—','online'=>false];
         }
     }
-    $res = [];
-    if (is_array($json)) {
-        $inbounds = $json['inbounds'] ?? [];
-        foreach ($inbounds as $ib) {
-            $clients = ($ib['settings']['clients'] ?? []);
-            foreach ($clients as $c) {
-                $email = $c['email'] ?? '';
-                if ($email === '' || isset($res[$email])) continue;
-                [$expD, $days] = exp_meta($expiry[$email] ?? '');
-                $res[$email] = ['user'=>$email,'exp'=>$expD,'days'=>$days,'quota'=>0,'used'=>'—','online'=>false];
-            }
+
+    // fallback: any "email": "user" client entries that lack a ### marker
+    if (preg_match_all('/"email"\s*:\s*"([^"]+)"/', $raw, $me)) {
+        foreach ($me[1] as $email) {
+            if ($email === '' || isset($byUser[$email])) continue;
+            $byUser[$email] = ['user'=>$email,'exp'=>'—','days'=>null,'quota'=>0,'used'=>'—','online'=>false];
         }
     }
-    return array_values($res);
+
+    return array_values($byUser);
 }
 
 function ss_accounts(): array {
