@@ -16,7 +16,18 @@ die()   { echo -e "  ${RED}✘${NC} $*"; exit 1; }
 PANEL_DIR="/var/www/vps-panel"
 PUBLIC_DIR="${PANEL_DIR}/public"
 SITE="vps-panel"
-PORT="${1:-8443}"          # panel port (default 8443); guna 80/443 jika free
+PORT="${1:-8444}"          # panel port (default 8444; 8443 biasanya dipakai xray vless-grpc)
+
+# Cari port bebas jika yang diminta sudah diduduki (seperti 8443 oleh xray).
+port_free() {
+  [[ -z "$(ss -H -tlnp 2>/dev/null | grep -E ":$1[[:space:]]")" ]]
+}
+if ! port_free "${PORT}"; then
+  warn "Port ${PORT} sudah diduduki, mencari port bebas..."
+  for p in 8444 8445 8090 8080 8888 8000 9000; do
+    if port_free "$p"; then PORT="$p"; ok "Guna port ${PORT}."; break; fi
+  done
+fi
 
 # --- domain / IP ---
 IP=$(curl -sS --max-time 6 ifconfig.me 2>/dev/null || echo "VPS-IP")
