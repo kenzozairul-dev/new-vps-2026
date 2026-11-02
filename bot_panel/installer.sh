@@ -4,18 +4,25 @@ biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
 #########################
 
 BURIQ () {
-    curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip > /root/tmp
-    data=( `cat /root/tmp | grep -E "^### " | awk '{print $2}'` )
+    curl -sS -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip?x=$(date +%s)" > /root/tmp
+    if [ ! -s /root/tmp ]; then
+        rm -f /root/tmp
+        return 0
+    fi
+    data=( $(awk '/^### /{print $2}' /root/tmp) )
     for user in "${data[@]}"
     do
-    exp=( `grep -E "^### $user" "/root/tmp" | awk '{print $3}'` )
-    d1=(`date -d "$exp" +%s`)
-    d2=(`date -d "$biji" +%s`)
+    exp=$(awk -v u="$user" '$1=="###" && $2==u {print $3; exit}' /root/tmp)
+    [ -z "$exp" ] && continue
+    d1=$(date -d "$exp" +%s 2>/dev/null)
+    d2=$(date -d "$biji" +%s 2>/dev/null)
+    [ -z "$d1" ] && continue
+    [ -z "$d2" ] && d2=$(date +%s)
     exp2=$(( (d1 - d2) / 86400 ))
-    if [[ "$exp2" -le "0" ]]; then
-    echo $user > /etc/.$user.ini
+    if [ "$exp2" -le 0 ]; then
+    echo "$user" > "/etc/.$user.ini"
     else
-    rm -f /etc/.$user.ini > /dev/null 2>&1
+    rm -f "/etc/.$user.ini" > /dev/null 2>&1
     fi
     done
     rm -f /root/tmp
@@ -27,13 +34,12 @@ echo $Name > /usr/local/etc/.$Name.ini
 CekOne=$(cat /usr/local/etc/.$Name.ini)
 
 Bloman () {
-if [ -f "/etc/.$Name.ini" ]; then
-CekTwo=$(cat /etc/.$Name.ini)
+res="Permission Accepted..."
+if [ -n "$Name" ] && [ -f "/etc/.$Name.ini" ]; then
+CekTwo=$(cat "/etc/.$Name.ini" 2>/dev/null)
     if [ "$CekOne" = "$CekTwo" ]; then
         res="Expired"
     fi
-else
-res="Permission Accepted..."
 fi
 }
 
@@ -41,11 +47,11 @@ PERMISSION () {
     MYIP=$(curl -sS ipv4.icanhazip.com)
     IZIN=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | awk '{print $4}' | grep $MYIP)
     if [ "$MYIP" = "$IZIN" ]; then
+    BURIQ
     Bloman
     else
     res="Permission Denied!"
     fi
-    BURIQ
 }
 clear
 red='\e[1;31m'
