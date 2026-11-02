@@ -158,6 +158,8 @@ echo -e "[ ${green}INFO${NC} ] Aight good ... installation file is ready"
 sleep 2
 echo -ne "[ ${green}INFO${NC} ] Check permission : "
 
+rm -f /home/needupdate > /dev/null 2>&1
+
 PERMISSION
 if [ -f /home/needupdate ]; then
 red "Your script need to update first !"
