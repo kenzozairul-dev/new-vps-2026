@@ -69,21 +69,39 @@ fi
 clear
 x="ok"
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
+svc_up(){
+    local svc="$1" pat="$2"
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl is-active --quiet "$svc" 2>/dev/null && return 0
+    fi
+    if command -v pgrep >/dev/null 2>&1; then
+        pgrep -f -- "$pat" >/dev/null 2>&1 && return 0
+    else
+        ps -ef 2>/dev/null | grep -v grep | grep -q -- "$pat" && return 0
+    fi
+    return 1
+}
 chck_pid(){
-	PID=`ps -ef |grep -v grep | grep xl2tpd |awk '{print $2}'`
-	if [[ ! -z "${PID}" ]]; then
-			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} & ${Green_font_prefix}Running${Font_color_suffix}"
-		else
-			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} but ${Red_font_prefix}Not Running${Font_color_suffix}"
-		fi
+	if ! command -v xl2tpd >/dev/null 2>&1; then
+		echo -e "Current status L2TP: ${Red_font_prefix}Not Installed${Font_color_suffix}"
+		return
+	fi
+	if svc_up "xl2tpd" "xl2tpd"; then
+		echo -e "Current status L2TP: ${Green_font_prefix} Installed${Font_color_suffix} & ${Green_font_prefix}Running${Font_color_suffix}"
+	else
+		echo -e "Current status L2TP: ${Green_font_prefix} Installed${Font_color_suffix} but ${Red_font_prefix}Not Running${Font_color_suffix}"
+	fi
 }
 check_pid(){
-	PID=`ps -ef |grep -v grep | grep pptpd |awk '{print $2}'`
-	if [[ ! -z "${PID}" ]]; then
-			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} & ${Green_font_prefix}Running${Font_color_suffix}"
-		else
-			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} but ${Red_font_prefix}Not Running${Font_color_suffix}"
-		fi
+	if ! command -v pptpd >/dev/null 2>&1; then
+		echo -e "Current status PPTP: ${Red_font_prefix}Not Installed${Font_color_suffix}"
+		return
+	fi
+	if svc_up "pptpd" "pptpd"; then
+		echo -e "Current status PPTP: ${Green_font_prefix} Installed${Font_color_suffix} & ${Green_font_prefix}Running${Font_color_suffix}"
+	else
+		echo -e "Current status PPTP: ${Green_font_prefix} Installed${Font_color_suffix} but ${Red_font_prefix}Not Running${Font_color_suffix}"
+	fi
 }
 while true $x != "ok"
 do

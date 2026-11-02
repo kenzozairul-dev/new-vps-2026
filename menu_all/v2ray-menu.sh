@@ -87,18 +87,28 @@ rekk='V2RAY'
 kjj='v2ray'
 fi
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
+svc_up(){
+    local svc="$1" pat="$2"
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl is-active --quiet "$svc" 2>/dev/null && return 0
+    fi
+    if command -v pgrep >/dev/null 2>&1; then
+        pgrep -f -- "$pat" >/dev/null 2>&1 && return 0
+    else
+        ps -ef 2>/dev/null | grep -v grep | grep -q -- "$pat" && return 0
+    fi
+    return 1
+}
 chck_pid(){
-	PID=`ps -ef |grep -v grep | grep $kjj |awk '{print $2}'`
+	PID=$(pgrep -f -- "$kjj" 2>/dev/null)
 }
 menu_sts(){
 	if [[ -e /usr/bin/$kjj ]]; then
-		chck_pid
-		if [[ ! -z "${PID}" ]]; then
+		if svc_up "$kjj" "$kjj"; then
 			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} & ${Green_font_prefix}Running${Font_color_suffix}"
 		else
 			echo -e "Current status: ${Green_font_prefix} Installed${Font_color_suffix} but ${Red_font_prefix}Not Running${Font_color_suffix}"
 		fi
-	#	cd "${ssr_folder}"
 	else
 		echo -e "Current status: ${Red_font_prefix}Not Installed${Font_color_suffix}"
 	fi
