@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="SCRIPT VPS MENU — web operations console for server status, protocol services, accounts and logs.">
+<title>SCRIPT VPS MENU · v3.1 — Ops Console</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#main" aria-label="SCRIPT VPS MENU home">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2.75" y="3.75" width="18.5" height="16.5" rx="2.5"/>
+          <path d="M6.5 8.5l3 3.5-3 3.5M11.5 15.5h5"/>
+        </svg>
+      </span>
+      <span class="brand__word">
+        <span class="brand__line">SCRIPT VPS</span>
+        <span class="brand__line brand__line--muted">MENU</span>
+      </span>
+      <span class="chip chip--version" title="Console version">v3.1</span>
+    </a>
+
+    <div class="conn" role="status" aria-label="Connection status: connected, 24 milliseconds">
+      <span class="conn__dot" aria-hidden="true"></span>
+      <span class="conn__label">CONNECTED</span>
+      <span class="conn__sep" aria-hidden="true"></span>
+      <span class="conn__latency" id="latency">24ms</span>
+    </div>
+
+    <div class="topbar__right">
+      <div class="client">
+        <span class="client__name">kenzo</span>
+        <span class="chip chip--life">Lifetime</span>
+      </div>
+      <button class="avatar" type="button" id="avatarBtn" aria-label="Account menu for kenzo" aria-haspopup="true" aria-expanded="false">K</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="shell">
+
+    <!-- ============ SERVER HERO ============ -->
+    <section class="hero panel" aria-labelledby="hero-title">
+      <div class="hero__grid" aria-hidden="true"></div>
+      <div class="hero__body">
+        <div class="hero__identity">
+          <p class="eyebrow"><span class="eyebrow__bracket">[</span>SERVER 01 · SG<span class="eyebrow__bracket">]</span></p>
+          <h1 class="visually-hidden" id="hero-title">Server 172.237.95.75 status</h1>
+
+          <div class="ip-row">
+            <span class="ip" id="serverIp">172.237.95.75</span>
+            <button class="icon-btn copy-btn" type="button" data-copy="172.237.95.75" aria-label="Copy server IP address">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="7" y="7" width="9.5" height="9.5" rx="2"/><path d="M13 7V5.5A2.5 2.5 0 0 0 10.5 3h-5A2.5 2.5 0 0 0 3 5.5v5A2.5 2.5 0 0 0 5.5 13H7"/>
+              </svg>
+              <span class="copy-btn__label" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="domain-row">
+            <a class="domain" href="#services">sg1.kenzovpn.my</a>
+            <span class="chip chip--core">XRAY</span>
+            <span class="chip chip--ghost">KVM · SG</span>
+          </div>
+
+          <dl class="meta-grid">
+            <div class="meta">
+              <dt>Uptime</dt>
+              <dd class="mono">12d 4h 33m</dd>
+            </div>
+            <div class="meta">
+              <dt>OS</dt>
+              <dd>Ubuntu 22.04 <span class="dim">LTS</span></dd>
+            </div>
+            <div class="meta">
+              <dt>Kernel</dt>
+              <dd class="mono">5.15.0-118-generic</dd>
+            </div>
+            <div class="meta">
+              <dt>Region</dt>
+              <dd>Singapore <span class="dim">/ ap-southeast-1</span></dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero__actions">
+          <div class="hero__health">
+            <span class="pulse" aria-hidden="true"></span>
+            <span class="mono">CORE HEALTHY</span>
+            <span class="dim mono">· 5/7 up · 1 stopped</span>
+          </div>
+          <button class="btn btn--primary" type="button" id="updateBtn">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M10 3v4M10 7a5 5 0 1 1-5 5"/>
+              <path d="M10 3.5 7.5 6M10 3.5 12.5 6"/>
+            </svg>
+            Run Update
+            <span class="btn__tag">3.1</span>
+          </button>
+          <p class="hero__note mono">last check 2m ago · stable channel</p>
+        </div>
+      </div>
+
+      <div class="kpis" role="list" aria-label="Server resource usage">
+        <div class="kpi" role="listitem">
+          <div class="kpi__top">
+            <span class="kpi__label">CPU LOAD</span>
+            <span class="kpi__pct mono" id="cpuPct">21%</span>
+          </div>
+          <div class="kpi__value"><span class="mono num" data-count="0.42" data-decimals="2">0.42</span><span class="kpi__unit mono">/ 2 core</span></div>
+          <svg class="spark" viewBox="0 0 120 24" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,16 10,14 20,17 30,11 40,13 50,8 60,12 70,9 80,15 90,10 100,12 110,7 120,11"/>
+          </svg>
+        </div>
+        <div class="kpi" role="listitem">
+          <div class="kpi__top">
+            <span class="kpi__label">RAM USED</span>
+            <span class="kpi__pct mono">45%</span>
+          </div>
+          <div class="kpi__value"><span class="mono num" data-count="1.8" data-decimals="1">1.8</span><span class="kpi__unit mono">/ 4.0 GB</span></div>
+          <div class="bar" role="img" aria-label="RAM 45 percent"><span style="--pct:45%"></span></div>
+        </div>
+        <div class="kpi" role="listitem">
+          <div class="kpi__top">
+            <span class="kpi__label">DISK USED</span>
+            <span class="kpi__pct mono">36%</span>
+          </div>
+          <div class="kpi__value"><span class="mono num" data-count="28.4" data-decimals="1">28.4</span><span class="kpi__unit mono">/ 80 GB</span></div>
+          <div class="bar" role="img" aria-label="Disk 36 percent"><span style="--pct:36%"></span></div>
+        </div>
+        <div class="kpi" role="listitem">
+          <div class="kpi__top">
+            <span class="kpi__label">ACTIVE USERS</span>
+            <span class="kpi__pct mono">55%</span>
+          </div>
+          <div class="kpi__value"><span class="mono num" data-count="33" data-decimals="0">33</span><span class="kpi__unit mono">/ 60 slots</span></div>
+          <div class="bar bar--warn" role="img" aria-label="Active users 33 of 60"><span style="--pct:55%"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SERVICE GRID ============ -->
+    <section class="section" id="services" aria-labelledby="services-title">
+      <header class="section__head">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__bracket">[</span>01<span class="eyebrow__bracket">]</span> SERVICES</p>
+          <h2 class="section__title" id="services-title">Protocol stack</h2>
+        </div>
+        <div class="section__meta">
+          <span class="mono dim"><span id="svcRunning">5</span> running · <span id="svcTotal">7</span> configured</span>
+          <span class="legend" aria-hidden="true"><i class="legend__dot legend__dot--ok"></i>live <i class="legend__dot legend__dot--off"></i>stopped</span>
+        </div>
+      </header>
+
+      <div class="svc-grid" id="svcGrid">
+        <button class="svc-card" type="button" data-service="ssh" aria-label="Open SSH and OVPN service details. Status running.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[01]</span>
+            <span class="pill pill--run"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+          </span>
+          <span class="svc-card__name">SSH &amp; OVPN</span>
+          <span class="svc-card__desc">OpenSSH · Dropbear · OpenVPN · OHP</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">14</b><span>users</span></span>
+            <span class="svc-card__ports mono">22 · 109 · 143 · 443</span>
+          </span>
+        </button>
+
+        <button class="svc-card" type="button" data-service="xray" aria-label="Open XRAY VMess and VLess service details. Status running.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[02]</span>
+            <span class="pill pill--run"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+          </span>
+          <span class="svc-card__name">XRAY <span class="svc-card__name-sub">— VMess / VLess</span></span>
+          <span class="svc-card__desc">gRPC · WS · XTLS · TLS 1.3</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">9</b><span>users</span></span>
+            <span class="svc-card__ports mono">443 · 8443 · 2087</span>
+          </span>
+        </button>
+
+        <button class="svc-card" type="button" data-service="trojan" aria-label="Open TROJAN-GFW and GO service details. Status running.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[03]</span>
+            <span class="pill pill--run"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+          </span>
+          <span class="svc-card__name">TROJAN-GFW &amp; GO</span>
+          <span class="svc-card__desc">TLS camouflage · fallback nginx</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">3</b><span>users</span></span>
+            <span class="svc-card__ports mono">2083 · 2087</span>
+          </span>
+        </button>
+
+        <button class="svc-card" type="button" data-service="wireguard" aria-label="Open WIREGUARD service details. Status running.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[04]</span>
+            <span class="pill pill--run"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+          </span>
+          <span class="svc-card__name">WIREGUARD</span>
+          <span class="svc-card__desc">wg0 · UDP · fast roaming</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">5</b><span>peers</span></span>
+            <span class="svc-card__ports mono">51820/udp</span>
+          </span>
+        </button>
+
+        <button class="svc-card svc-card--stopped" type="button" data-service="sstp" aria-label="Open SSTP service details. Status stopped.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[05]</span>
+            <span class="pill pill--stop"><i class="pill__dot" aria-hidden="true"></i>STOPPED</span>
+          </span>
+          <span class="svc-card__name">SSTP</span>
+          <span class="svc-card__desc">sstp-server · cert expired 4d ago</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">0</b><span>users</span></span>
+            <span class="svc-card__ports mono">444</span>
+          </span>
+        </button>
+
+        <button class="svc-card" type="button" data-service="l2tp" aria-label="Open L2TP and PPTP service details. Status running.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[06]</span>
+            <span class="pill pill--run"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+          </span>
+          <span class="svc-card__name">L2TP / PPTP</span>
+          <span class="svc-card__desc">xl2tpd · pppd · chap-secrets</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">2</b><span>users</span></span>
+            <span class="svc-card__ports mono">1701/udp · 1723</span>
+          </span>
+        </button>
+
+        <button class="svc-card svc-card--empty" type="button" data-service="shadowsocks" aria-label="Open Shadowsocks service details. Not installed.">
+          <span class="svc-card__top">
+            <span class="svc-card__idx mono">[07]</span>
+            <span class="pill pill--muted"><i class="pill__dot" aria-hidden="true"></i>NOT INSTALLED</span>
+          </span>
+          <span class="svc-card__name">SHADOWSOCKS <span class="svc-card__name-sub">obfs / SSR</span></span>
+          <span class="svc-card__desc">ss-libev not present on this image</span>
+          <span class="svc-card__stats">
+            <span class="svc-card__stat"><b class="mono">—</b><span>users</span></span>
+            <span class="svc-card__ports mono">no listener</span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ COMMAND + LOG ============ -->
+    <div class="ops-grid">
+      <section class="panel cmd-panel" aria-labelledby="cmd-title">
+        <header class="panel__head">
+          <div>
+            <p class="eyebrow"><span class="eyebrow__bracket">[</span>02<span class="eyebrow__bracket">]</span> QUICK ACTIONS</p>
+            <h2 class="panel__title" id="cmd-title">Command palette</h2>
+          </div>
+          <span class="chip chip--ghost mono">simulated</span>
+        </header>
+
+        <form class="cmd" id="cmdForm" autocomplete="off">
+          <label class="visually-hidden" for="cmdInput">Type a VPS menu command</label>
+          <div class="cmd__bar">
+            <span class="cmd__prompt mono" aria-hidden="true">root@vps:~#</span>
+            <input class="cmd__input mono" id="cmdInput" name="command" type="text" placeholder="type a command, e.g. xray-menu" aria-describedby="cmdHelp" spellcheck="false" autocapitalize="off" autocorrect="off">
+            <span class="cmd__hint mono" aria-hidden="true">↵ run</span>
+          </div>
+          <p class="cmd__help" id="cmdHelp">Type to filter. ↑ ↓ to select, Enter to run, Esc to clear.</p>
+
+          <ul class="cmd__list" id="cmdList" aria-label="Available commands">
+            <li>
+              <button class="cmd__item" type="button" aria-current="true" data-cmd="ssh-menu">
+                <span class="cmd__name mono">ssh-menu</span>
+                <span class="cmd__desc">Buka menu SSH &amp; OVPN — user, port, OHP</span>
+                <span class="cmd__key mono">01</span>
+              </button>
+            </li>
+            <li>
+              <button class="cmd__item" type="button" aria-current="false" data-cmd="xray-menu">
+                <span class="cmd__name mono">xray-menu</span>
+                <span class="cmd__desc">Urus VMess / VLess / Trojan account</span>
+                <span class="cmd__key mono">02</span>
+              </button>
+            </li>
+            <li>
+              <button class="cmd__item" type="button" aria-current="false" data-cmd="wg-menu">
+                <span class="cmd__name mono">wg-menu</span>
+                <span class="cmd__desc">WireGuard peer &amp; QR generator</span>
+                <span class="cmd__key mono">04</span>
+              </button>
+            </li>
+            <li>
+              <button class="cmd__item" type="button" aria-current="false" data-cmd="trial">
+                <span class="cmd__name mono">trial</span>
+                <span class="cmd__desc">Generate trial account — 1 hari</span>
+                <span class="cmd__key mono">55</span>
+              </button>
+            </li>
+            <li>
+              <button class="cmd__item" type="button" aria-current="false" data-cmd="usernew">
+                <span class="cmd__name mono">usernew</span>
+                <span class="cmd__desc">Daftar user SSH baru + auto expiry</span>
+                <span class="cmd__key mono">66</span>
+              </button>
+            </li>
+            <li>
+              <button class="cmd__item" type="button" aria-current="false" data-cmd="update">
+                <span class="cmd__name mono">update</span>
+                <span class="cmd__desc">Semak versi &amp; pasang update v3.1</span>
+                <span class="cmd__key mono">999</span>
+              </button>
+            </li>
+          </ul>
+          <p class="cmd__empty" id="cmdEmpty" hidden>No command matches <span class="mono" id="cmdEmptyTerm"></span>. Try <button class="linklike mono" type="button" id="cmdReset">reset filter</button>.</p>
+        </form>
+
+        <div class="cmd__output" id="cmdOutput" hidden>
+          <div class="cmd__output-head">
+            <span class="mono dim" id="cmdOutputTitle">output</span>
+            <button class="btn btn--tiny btn--ghost" type="button" id="cmdClear">clear</button>
+          </div>
+          <pre class="cmd__out" id="cmdOutBody" tabindex="0" role="region" aria-labelledby="cmdOutputTitle"></pre>
+        </div>
+      </section>
+
+      <section class="panel log-panel" aria-labelledby="log-title">
+        <header class="panel__head">
+          <div>
+            <p class="eyebrow"><span class="eyebrow__bracket">[</span>03<span class="eyebrow__bracket">]</span> LOG TAIL</p>
+            <h2 class="panel__title" id="log-title">/var/log/vps/stream</h2>
+          </div>
+          <div class="log__controls">
+            <span class="pill pill--live" id="logLive"><i class="pill__dot" aria-hidden="true"></i>LIVE</span>
+            <button class="btn btn--tiny btn--ghost" type="button" id="logPause" aria-pressed="false">pause</button>
+            <button class="btn btn--tiny btn--ghost" type="button" id="logClear">clear</button>
+          </div>
+        </header>
+        <div class="log" id="logStream" role="log" aria-label="Live server log" aria-live="off" tabindex="0">
+          <ol class="log__lines" id="logLines" tabindex="0" aria-label="Log entries, newest at bottom"></ol>
+          <div class="log__foot">
+            <span class="mono dim"><span id="logCount">0</span> lines · tail -f</span>
+            <button class="log__jump mono" type="button" id="logJump" hidden>↓ new output</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ SECONDARY MENU ============ -->
+    <section class="panel menu-panel" aria-labelledby="menu-title">
+      <header class="panel__head">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__bracket">[</span>04<span class="eyebrow__bracket">]</span> CLI PARITY</p>
+          <h2 class="panel__title" id="menu-title">Remaining menu</h2>
+        </div>
+        <span class="mono dim">select a number · same as terminal</span>
+      </header>
+
+      <div class="menu-list">
+        <button class="menu-item" type="button" data-menu="55" data-label="Trial Generator">
+          <span class="menu-item__idx mono">55</span>
+          <span class="menu-item__label">Trial Generator</span>
+          <span class="menu-item__meta mono">1d · 3 acc</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="66" data-label="Logs User Created">
+          <span class="menu-item__idx mono">66</span>
+          <span class="menu-item__label">Logs User Created</span>
+          <span class="menu-item__meta mono">1 204 lines</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="77" data-label="VPS Setting">
+          <span class="menu-item__idx mono">77</span>
+          <span class="menu-item__label">VPS Setting</span>
+          <span class="menu-item__meta mono">ports · cert</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="88" data-label="Autokill Multi-login">
+          <span class="menu-item__idx mono">88</span>
+          <span class="menu-item__label">Autokill Multi-login</span>
+          <span class="menu-item__meta mono">on · 2 IP</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="99" data-label="ALL Information VPS">
+          <span class="menu-item__idx mono">99</span>
+          <span class="menu-item__label">ALL Information VPS</span>
+          <span class="menu-item__meta mono">full dump</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="100" data-label="SYSTEM / Admin">
+          <span class="menu-item__idx mono">100</span>
+          <span class="menu-item__label">SYSTEM / Admin</span>
+          <span class="menu-item__meta mono">root only</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item" type="button" data-menu="700" data-label="Bot-Panel">
+          <span class="menu-item__idx mono">700</span>
+          <span class="menu-item__label">Bot-Panel</span>
+          <span class="menu-item__meta menu-item__meta--ok mono"><i class="dot" aria-hidden="true"></i>online</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+        <button class="menu-item menu-item--warn" type="button" id="menuUpdate" data-menu="999" data-label="Update Available">
+          <span class="menu-item__idx mono">999</span>
+          <span class="menu-item__label">Update Available <span class="menu-item__warn mono">→ v3.1</span></span>
+          <span class="menu-item__meta mono">action required</span>
+          <svg class="menu-item__chev" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ CHANGELOG ============ -->
+    <section class="panel log-panel changelog" aria-labelledby="cl-title">
+      <div class="changelog__intro">
+        <p class="eyebrow"><span class="eyebrow__bracket">[</span>05<span class="eyebrow__bracket">]</span> CHANGELOG</p>
+        <h2 class="panel__title" id="cl-title">What's new in 3.1</h2>
+        <p class="changelog__lede">Auto-update engine, semakan versi pantas dan UI panel baru. Rollout is staged — server ini dalam batch pertama.</p>
+        <div class="changelog__meta mono">
+          <span>02-11-2026</span>
+          <span class="dim">·</span>
+          <span class="dim">build 20261102.1</span>
+        </div>
+        <button class="btn btn--ghost" type="button" id="clViewAll" aria-expanded="false" aria-controls="clOld">
+          View all
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg>
+        </button>
+      </div>
+
+      <div class="changelog__body">
+        <ul class="cl-list">
+          <li><span class="cl-list__tag mono">NEW</span><span>new auto-update engine (3.1)</span></li>
+          <li><span class="cl-list__tag mono">UI</span><span>panel update dengan UI baru (3.1)</span></li>
+          <li><span class="cl-list__tag mono">CORE</span><span>semakan versi pantas + changelog preview (3.1)</span></li>
+          <li><span class="cl-list__tag mono">FIX</span><span>fix semakan permission pada install baru (3.1)</span></li>
+          <li><span class="cl-list__tag mono">SEC</span><span>semua URL raw kini guna repo sendiri (3.1)</span></li>
+        </ul>
+
+        <div class="cl-old" id="clOld" hidden>
+          <div class="cl-group">
+            <p class="cl-group__ver mono">3.0 <span class="dim">· 06-11-2021</span></p>
+            <ul>
+              <li>fix bug &amp; port squid</li>
+              <li>update core to latest — v2ray, xray</li>
+              <li>bot update API</li>
+            </ul>
+          </div>
+          <div class="cl-group">
+            <p class="cl-group__ver mono">2.4 <span class="dim">· 23-08-2021</span></p>
+            <ul>
+              <li>rewrite menu &amp; restart all service</li>
+              <li>speed limit, cleaner RAM, torrent toggle</li>
+              <li>vless tcp xtls direct / origin</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__left">
+      <span class="mono">SCRIPT VPS MENU · v3.1</span>
+      <span class="footer__kbd"><kbd>ESC</kbd> to close panels</span>
+    </div>
+    <div class="footer__right">
+      <span class="footer__status"><i class="dot" aria-hidden="true"></i>All systems nominal</span>
+      <span class="mono dim" id="footUptime">12d 04:33:12</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ DRAWER ============ -->
+<div class="scrim" id="drawerScrim" hidden></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" tabindex="-1" inert>
+  <header class="drawer__head">
+    <div class="drawer__titlewrap">
+      <p class="eyebrow"><span class="eyebrow__bracket">[</span><span id="drawerIdx">01</span><span class="eyebrow__bracket">]</span> SERVICE</p>
+      <h2 class="drawer__title" id="drawerTitle">SSH &amp; OVPN</h2>
+      <div class="drawer__sub">
+        <span class="pill" id="drawerPill"><i class="pill__dot" aria-hidden="true"></i>RUNNING</span>
+        <span class="mono dim" id="drawerUptime">up 12d 4h 33m</span>
+      </div>
+    </div>
+    <button class="icon-btn drawer__close" type="button" id="drawerClose" aria-label="Close service details">
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
+    </button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Service detail sections">
+    <button class="tab" role="tab" id="tab-accounts" aria-controls="panel-accounts" aria-selected="true" tabindex="0" type="button">Accounts <span class="tab__count mono" id="tabAccountCount">6</span></button>
+    <button class="tab" role="tab" id="tab-ports" aria-controls="panel-ports" aria-selected="false" tabindex="-1" type="button">Ports <span class="tab__count mono" id="tabPortCount">4</span></button>
+    <button class="tab" role="tab" id="tab-config" aria-controls="panel-config" aria-selected="false" tabindex="-1" type="button">Config</button>
+  </div>
+
+  <div class="drawer__body">
+    <section class="tabpanel" role="tabpanel" id="panel-accounts" aria-labelledby="tab-accounts" tabindex="0">
+      <div class="drawer__toolbar">
+        <span class="mono dim" id="accSummary">6 accounts · 2 expiring soon</span>
+        <button class="btn btn--tiny btn--ghost" type="button" id="addUserBtn">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+          Add user
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="acc-table">
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Expiry</th>
+              <th scope="col">Quota</th>
+              <th scope="col" class="col-login">Last login</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="accBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="accEmpty" hidden>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
+        <p class="empty__title" id="accEmptyTitle">No accounts</p>
+        <p class="empty__body" id="accEmptyBody">This service has no provisioned users.</p>
+        <button class="btn btn--tiny" type="button" id="accEmptyAction">Create first user</button>
+      </div>
+    </section>
+
+    <section class="tabpanel" role="tabpanel" id="panel-ports" aria-labelledby="tab-ports" tabindex="0" hidden>
+      <p class="drawer__note">Listening sockets as reported by <span class="mono">ss -tulpn</span>. Firewall allows only listed ports.</p>
+      <ul class="port-list" id="portList"></ul>
+    </section>
+
+    <section class="tabpanel" role="tabpanel" id="panel-config" aria-labelledby="tab-config" tabindex="0" hidden>
+      <div class="config-head">
+        <span class="mono dim" id="cfgPath">/etc/ssh/sshd_config</span>
+        <button class="btn btn--tiny btn--ghost copy-btn" type="button" id="cfgCopy" data-copy="">
+          <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="7" y="7" width="9.5" height="9.5" rx="2"/><path d="M13 7V5.5A2.5 2.5 0 0 0 10.5 3h-5A2.5 2.5 0 0 0 3 5.5v5A2.5 2.5 0 0 0 5.5 13H7"/></svg>
+          COPY
+        </button>
+      </div>
+      <pre class="code" id="cfgCode" tabindex="0" aria-label="Read-only service configuration"></pre>
+      <p class="drawer__note">Read-only preview. Edit via <span class="mono">vps-setting</span> on the server.</p>
+    </section>
+  </div>
+
+  <footer class="drawer__foot">
+    <span class="mono dim" id="drawerFootMeta">systemd · active (running)</span>
+    <div class="drawer__foot-actions">
+      <button class="btn btn--tiny btn--ghost" type="button" id="svcRestart">Restart</button>
+      <button class="btn btn--tiny" type="button" id="svcLogs">View logs</button>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ UPDATE MODAL ============ -->
+<div class="scrim" id="modalScrim" hidden></div>
+<div class="modal" id="updateModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc" aria-hidden="true" tabindex="-1" inert>
+  <header class="modal__head">
+    <div>
+      <p class="eyebrow"><span class="eyebrow__bracket">[</span>UPDATE<span class="eyebrow__bracket">]</span></p>
+      <h2 class="modal__title" id="modalTitle">Update available — v3.1</h2>
+    </div>
+    <button class="icon-btn" type="button" id="modalClose" aria-label="Close update dialog">
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
+    </button>
+  </header>
+  <div class="modal__body">
+    <p class="modal__desc" id="modalDesc">Versi semasa <span class="mono">3.0.9</span> → <span class="mono accent">3.1</span>. Update takes ~40s and restarts protocol services one by one. Existing accounts are preserved.</p>
+    <ul class="cl-list cl-list--compact">
+      <li><span class="cl-list__tag mono">NEW</span><span>new auto-update engine (3.1)</span></li>
+      <li><span class="cl-list__tag mono">UI</span><span>panel update dengan UI baru (3.1)</span></li>
+      <li><span class="cl-list__tag mono">CORE</span><span>semakan versi pantas + changelog preview (3.1)</span></li>
+      <li><span class="cl-list__tag mono">SEC</span><span>semua URL raw kini guna repo sendiri (3.1)</span></li>
+    </ul>
+    <div class="modal__meta">
+      <span class="mono dim">channel stable</span>
+      <span class="mono dim">sha 4f2a9c1</span>
+      <span class="mono dim">size 2.4 MB</span>
+    </div>
+    <div class="progress" id="updProgress" hidden>
+      <div class="progress__track"><span id="updBar"></span></div>
+      <p class="mono dim" id="updStatus">preparing…</p>
+    </div>
+  </div>
+  <footer class="modal__foot">
+    <button class="btn btn--ghost" type="button" id="modalCancel">Cancel</button>
+    <button class="btn btn--primary" type="button" id="modalConfirm">Confirm update</button>
+  </footer>
+</div>
+
+<div class="toaster" id="toaster" role="status" aria-live="polite" aria-atomic="false"></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
+
+
