@@ -4,7 +4,7 @@ biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
 #########################
 
 BURIQ () {
-    curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip > /root/tmp
+    curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip > /root/tmp
     data=( `cat /root/tmp | grep -E "^### " | awk '{print $2}'` )
     for user in "${data[@]}"
     do
@@ -20,9 +20,9 @@ BURIQ () {
     done
     rm -f  /root/tmp
 }
-# https://raw.githubusercontent.com/syfqsamvpn/access/main/ip 
+# https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip 
 MYIP=$(curl -sS ipv4.icanhazip.com)
-Name=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | grep $MYIP | awk '{print $2}')
+Name=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | grep $MYIP | awk '{print $2}')
 echo $Name > /usr/local/etc/.$Name.ini
 CekOne=$(cat /usr/local/etc/.$Name.ini)
 
@@ -39,7 +39,7 @@ fi
 
 PERMISSION () {
     MYIP=$(curl -sS ipv4.icanhazip.com)
-    IZIN=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | awk '{print $4}' | grep $MYIP)
+    IZIN=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | awk '{print $4}' | grep $MYIP)
     if [ "$MYIP" = "$IZIN" ]; then
     Bloman
     else
@@ -218,7 +218,7 @@ fi
 fi
 
 echo ""
-wget -q https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dependencies
+wget -q https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dependencies
 chmod +x dependencies 
 screen -S depen ./dependencies
 rm dependencies
@@ -251,7 +251,7 @@ read answer
             else
                 echo "peler=$pp" > /root/scdomain
             fi
-        wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/cf.sh" && chmod +x cf.sh && ./cf.sh
+        wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/cf.sh" && chmod +x cf.sh && ./cf.sh
     fi
 else
 clear
@@ -269,61 +269,61 @@ read -rp "Input ur domain : " -e pp
     else
         echo "peler=$pp" > /root/scdomain
     fi
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/cf.sh" && chmod +x cf.sh && ./cf.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/cf.sh" && chmod +x cf.sh && ./cf.sh
 fi
 
-wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/newmenu.sh" && chmod +x /usr/bin/menu
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/ssh/ssh-vpn.sh" && chmod +x ssh-vpn.sh && screen -S sshvpn ./ssh-vpn.sh
+wget -q -O /usr/bin/menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/newmenu.sh" && chmod +x /usr/bin/menu
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/ssh/ssh-vpn.sh" && chmod +x ssh-vpn.sh && screen -S sshvpn ./ssh-vpn.sh
 if [ "$coreselect" = "v2ray" ]; then
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/v2ray/ins-vt.sh" && chmod +x ins-vt.sh && screen -S insvt ./ins-vt.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/v2ray/ins-vt.sh" && chmod +x ins-vt.sh && screen -S insvt ./ins-vt.sh
 elif [ "$coreselect" = "xray" ]; then
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/ins-xray.sh" && chmod +x ins-xray.sh && screen -S insxray ./ins-xray.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/ins-xray.sh" && chmod +x ins-xray.sh && screen -S insxray ./ins-xray.sh
 fi
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/wg.sh" && chmod +x wg.sh && screen -S wg ./wg.sh
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/sstp/sstp.sh" && chmod +x sstp.sh && screen -S sstp ./sstp.sh
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/ipsec/ipsec.sh" && chmod +x ipsec.sh && screen -S ipsec ./ipsec.sh
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/ss.sh" && chmod +x ss.sh && screen -S ss ./ss.sh
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/ssr.sh" && chmod +x ssr.sh && screen -S ssr ./ssr.sh
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/system/set-br.sh" && chmod +x set-br.sh && screen -S sbr ./set-br.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/wg.sh" && chmod +x wg.sh && screen -S wg ./wg.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/sstp/sstp.sh" && chmod +x sstp.sh && screen -S sstp ./sstp.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/ipsec/ipsec.sh" && chmod +x ipsec.sh && screen -S ipsec ./ipsec.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/ss.sh" && chmod +x ss.sh && screen -S ss ./ss.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/ssr.sh" && chmod +x ssr.sh && screen -S ssr ./ssr.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/system/set-br.sh" && chmod +x set-br.sh && screen -S sbr ./set-br.sh
 #extension
 clear
 sleep 1
 echo -e "[ ${green}INFO${NC} ] Downloading extension !!"
 sleep 1
-wget -q -O /usr/bin/xtls "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/xtls.sh" && chmod +x /usr/bin/xtls && xtls && rm -f /usr/bin/xtls
-wget -q -O /usr/bin/setting-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/setting-menu.sh" && chmod +x /usr/bin/setting-menu
-wget -q -O /usr/bin/autokill-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/autokill-menu.sh" && chmod +x /usr/bin/autokill-menu
-wget -q -O /usr/bin/info-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/info-menu.sh" && chmod +x /usr/bin/info-menu
-wget -q -O /usr/bin/system-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/system-menu.sh" && chmod +x /usr/bin/system-menu
-wget -q -O /usr/bin/trial-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/trial-menu.sh" && chmod +x /usr/bin/trial-menu
+wget -q -O /usr/bin/xtls "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/xtls.sh" && chmod +x /usr/bin/xtls && xtls && rm -f /usr/bin/xtls
+wget -q -O /usr/bin/setting-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/setting-menu.sh" && chmod +x /usr/bin/setting-menu
+wget -q -O /usr/bin/autokill-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/autokill-menu.sh" && chmod +x /usr/bin/autokill-menu
+wget -q -O /usr/bin/info-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/info-menu.sh" && chmod +x /usr/bin/info-menu
+wget -q -O /usr/bin/system-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/system-menu.sh" && chmod +x /usr/bin/system-menu
+wget -q -O /usr/bin/trial-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/trial-menu.sh" && chmod +x /usr/bin/trial-menu
 
 
-wget -q -O /usr/bin/kill-by-user "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/kill-by-user.sh" && chmod +x /usr/bin/kill-by-user
-wget -q -O /usr/bin/kumbang "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/kumbang.sh" && chmod +x /usr/bin/kumbang
-wget -q -O /usr/bin/importantfile "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/toolkit.sh" && chmod +x /usr/bin/importantfile
-wget -q -O /usr/bin/status "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/status.sh" && chmod +x /usr/bin/status
-wget -q -O /usr/bin/autoreboot "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/autoreboot.sh" && chmod +x /usr/bin/autoreboot
-wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/limit-speed.sh" && chmod +x /usr/bin/limit-speed
-wget -q -O /usr/bin/add-host "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/add-host.sh" && chmod +x /usr/bin/add-host
-wget -q -O /usr/bin/akill-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/akill-ws.sh" && chmod +x /usr/bin/akill-ws
-wget -q -O /usr/bin/autokill-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/autokill-ws.sh" && chmod +x /usr/bin/autokill-ws
-wget -q -O /usr/bin/restart-service "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/restart-service.sh" && chmod +x /usr/bin/restart-service
+wget -q -O /usr/bin/kill-by-user "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/kill-by-user.sh" && chmod +x /usr/bin/kill-by-user
+wget -q -O /usr/bin/kumbang "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/kumbang.sh" && chmod +x /usr/bin/kumbang
+wget -q -O /usr/bin/importantfile "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/toolkit.sh" && chmod +x /usr/bin/importantfile
+wget -q -O /usr/bin/status "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/status.sh" && chmod +x /usr/bin/status
+wget -q -O /usr/bin/autoreboot "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/autoreboot.sh" && chmod +x /usr/bin/autoreboot
+wget -q -O /usr/bin/limit-speed "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/limit-speed.sh" && chmod +x /usr/bin/limit-speed
+wget -q -O /usr/bin/add-host "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/add-host.sh" && chmod +x /usr/bin/add-host
+wget -q -O /usr/bin/akill-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/akill-ws.sh" && chmod +x /usr/bin/akill-ws
+wget -q -O /usr/bin/autokill-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/autokill-ws.sh" && chmod +x /usr/bin/autokill-ws
+wget -q -O /usr/bin/restart-service "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/restart-service.sh" && chmod +x /usr/bin/restart-service
  
-wget -q -O /usr/bin/installbot "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/bot_panel/installer.sh" && chmod +x /usr/bin/installbot
-wget -q -O /usr/bin/bbt "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/bot_panel/bbt.sh" && chmod +x /usr/bin/bbt
+wget -q -O /usr/bin/installbot "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/bot_panel/installer.sh" && chmod +x /usr/bin/installbot
+wget -q -O /usr/bin/bbt "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/bot_panel/bbt.sh" && chmod +x /usr/bin/bbt
 
 sleep 2
 echo -e "[ ${green}INFO${NC} ] Installing Successfully!!"
 sleep 1
 echo -e "[ ${green}INFO${NC} ] Dont forget to reboot later"
 #=======[ end ] ======
-wget -q -O /usr/bin/xp https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/xp.sh && chmod +x /usr/bin/xp
-wget -q -O /usr/bin/info https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/info.sh && chmod +x /usr/bin/info
+wget -q -O /usr/bin/xp https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/xp.sh && chmod +x /usr/bin/xp
+wget -q -O /usr/bin/info https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/info.sh && chmod +x /usr/bin/info
 
 #set time zone
 ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
 
-wget -q -O /usr/bin/.ascii-home "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/resources/ascii-home"
+wget -q -O /usr/bin/.ascii-home "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/resources/ascii-home"
 cat> /root/.profile << END
 # ~/.profile: executed by Bourne-compatible login shells.
 
@@ -350,7 +350,7 @@ if [ ! -f "/etc/log-create-user.log" ]; then
 echo "Log All Account " > /etc/log-create-user.log
 fi
 history -c
-serverV=$( curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/versi  )
+serverV=$( curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/versi  )
 echo $serverV > /opt/.ver
 aureb=$(cat /home/re_otm)
 b=11

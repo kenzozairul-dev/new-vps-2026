@@ -5,7 +5,7 @@ biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
 #########################
 
 BURIQ () {
-    curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip > /root/tmp
+    curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip > /root/tmp
     data=( `cat /root/tmp | grep -E "^### " | awk '{print $2}'` )
     for user in "${data[@]}"
     do
@@ -23,7 +23,7 @@ BURIQ () {
 }
 
 MYIP=$(curl -sS ipv4.icanhazip.com)
-Name=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | grep $MYIP | awk '{print $2}')
+Name=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | grep $MYIP | awk '{print $2}')
 echo $Name > /usr/local/etc/.$Name.ini
 CekOne=$(cat /usr/local/etc/.$Name.ini)
 
@@ -40,7 +40,7 @@ fi
 
 PERMISSION () {
     MYIP=$(curl -sS ipv4.icanhazip.com)
-    IZIN=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | awk '{print $4}' | grep $MYIP)
+    IZIN=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | awk '{print $4}' | grep $MYIP)
     if [ "$MYIP" = "$IZIN" ]; then
     Bloman
     else
@@ -52,7 +52,7 @@ clear
 red='\e[1;31m'
 green='\e[0;32m'
 NC='\e[0m'
-curl -sS https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/resources/ascii-home
+curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/resources/ascii-home
 echo "Wireguard"
 echo "Progress..."
 sleep 3
@@ -144,14 +144,14 @@ WG_RUNNING=$?
 
 # Tambahan
 
-wget -q -O /usr/bin/add-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/add-wg.sh" && chmod +x /usr/bin/add-wg
-wget -q -O /usr/bin/del-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/del-wg.sh" && chmod +x /usr/bin/del-wg
-wget -q -O /usr/bin/cek-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/cek-wg.sh" && chmod +x /usr/bin/cek-wg
-wget -q -O /usr/bin/renew-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/renew-wg.sh" && chmod +x /usr/bin/renew-wg
-wget -q -O /usr/bin/trial-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/trial-wg.sh" && chmod +x /usr/bin/trial-wg
-wget -q -O /usr/bin/port-wg "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/wireguard/port-wg.sh" && chmod +x /usr/bin/port-wg
+wget -q -O /usr/bin/add-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/add-wg.sh" && chmod +x /usr/bin/add-wg
+wget -q -O /usr/bin/del-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/del-wg.sh" && chmod +x /usr/bin/del-wg
+wget -q -O /usr/bin/cek-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/cek-wg.sh" && chmod +x /usr/bin/cek-wg
+wget -q -O /usr/bin/renew-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/renew-wg.sh" && chmod +x /usr/bin/renew-wg
+wget -q -O /usr/bin/trial-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/trial-wg.sh" && chmod +x /usr/bin/trial-wg
+wget -q -O /usr/bin/port-wg "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/wireguard/port-wg.sh" && chmod +x /usr/bin/port-wg
 
-wget -q -O /usr/bin/wg-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/wg-menu.sh" && chmod +x /usr/bin/wg-menu
+wget -q -O /usr/bin/wg-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/wg-menu.sh" && chmod +x /usr/bin/wg-menu
 
 sleep 1
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }

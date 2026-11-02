@@ -17,7 +17,7 @@ fi
 
 
 
-curl -sS https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/resources/ascii-home
+curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/resources/ascii-home
 echo "Dependencies"
 echo "Progress..."
 sleep 2

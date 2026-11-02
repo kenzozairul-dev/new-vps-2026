@@ -1,3 +1,3 @@
 #!/bin/bash
-wget -q -O /usr/bin/yow "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/serv-updater.sh" && chmod +x /usr/bin/yow
+wget -q -O /usr/bin/yow "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/serv-updater.sh" && chmod +x /usr/bin/yow
 screen -S updss yow

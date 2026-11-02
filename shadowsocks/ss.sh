@@ -5,7 +5,7 @@ biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
 #########################
 
 BURIQ () {
-    curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip > /root/tmp
+    curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip > /root/tmp
     data=( `cat /root/tmp | grep -E "^### " | awk '{print $2}'` )
     for user in "${data[@]}"
     do
@@ -23,7 +23,7 @@ BURIQ () {
 }
 
 MYIP=$(curl -sS ipv4.icanhazip.com)
-Name=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | grep $MYIP | awk '{print $2}')
+Name=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | grep $MYIP | awk '{print $2}')
 echo $Name > /usr/local/etc/.$Name.ini
 CekOne=$(cat /usr/local/etc/.$Name.ini)
 
@@ -40,7 +40,7 @@ fi
 
 PERMISSION () {
     MYIP=$(curl -sS ipv4.icanhazip.com)
-    IZIN=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | awk '{print $4}' | grep $MYIP)
+    IZIN=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | awk '{print $4}' | grep $MYIP)
     if [ "$MYIP" = "$IZIN" ]; then
     Bloman
     else
@@ -56,7 +56,7 @@ red='\e[1;31m'
 green='\e[0;32m'
 yell='\e[1;33m'
 NC='\e[0m'
-curl -sS https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/resources/ascii-home
+curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/resources/ascii-home
 echo "Shadowsocks-obfs"
 echo "Progress..."
 sleep 3
@@ -191,12 +191,12 @@ sudo iptables -I INPUT -m state --state NEW -m udp -p udp --dport 2443:3543 -j A
 sudo iptables-save > /etc/iptables.up.rules
 sudo ip6tables-save > /etc/ip6tables.up.rules
 
-wget -q -O /usr/bin/add-ss "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/add-ss.sh" && chmod +x /usr/bin/add-ss
-wget -q -O /usr/bin/del-ss "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/del-ss.sh" && chmod +x /usr/bin/del-ss
-wget -q -O /usr/bin/cek-ss "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/cek-ss.sh" && chmod +x /usr/bin/cek-ss
-wget -q -O /usr/bin/renew-ss "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/renew-ss.sh" && chmod +x /usr/bin/renew-ss
-wget -q -O /usr/bin/trial-ss "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/shadowsocks/trial-ss.sh" && chmod +x /usr/bin/trial-ss
-wget -q -O /usr/bin/ss-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/ss-menu.sh" && chmod +x /usr/bin/ss-menu
+wget -q -O /usr/bin/add-ss "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/add-ss.sh" && chmod +x /usr/bin/add-ss
+wget -q -O /usr/bin/del-ss "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/del-ss.sh" && chmod +x /usr/bin/del-ss
+wget -q -O /usr/bin/cek-ss "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/cek-ss.sh" && chmod +x /usr/bin/cek-ss
+wget -q -O /usr/bin/renew-ss "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/renew-ss.sh" && chmod +x /usr/bin/renew-ss
+wget -q -O /usr/bin/trial-ss "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/shadowsocks/trial-ss.sh" && chmod +x /usr/bin/trial-ss
+wget -q -O /usr/bin/ss-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/ss-menu.sh" && chmod +x /usr/bin/ss-menu
 
 sleep 1
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }

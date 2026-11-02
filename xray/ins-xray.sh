@@ -4,7 +4,7 @@ biji=$(date +"%Y-%m-%d" -d "$dateFromServer")
 #########################
 
 BURIQ() {
-  curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip >/root/tmp
+  curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip >/root/tmp
   data=($(cat /root/tmp | grep -E "^### " | awk '{print $2}'))
   for user in "${data[@]}"; do
     exp=($(grep -E "^### $user" "/root/tmp" | awk '{print $3}'))
@@ -21,7 +21,7 @@ BURIQ() {
 }
 
 MYIP=$(curl -sS ipv4.icanhazip.com)
-Name=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | grep $MYIP | awk '{print $2}')
+Name=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | grep $MYIP | awk '{print $2}')
 echo $Name >/usr/local/etc/.$Name.ini
 CekOne=$(cat /usr/local/etc/.$Name.ini)
 
@@ -38,7 +38,7 @@ Bloman() {
 
 PERMISSION() {
   MYIP=$(curl -sS ipv4.icanhazip.com)
-  IZIN=$(curl -sS https://raw.githubusercontent.com/syfqsamvpn/access/main/ip | awk '{print $4}' | grep $MYIP)
+  IZIN=$(curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/access/ip | awk '{print $4}' | grep $MYIP)
   if [ "$MYIP" = "$IZIN" ]; then
     Bloman
   else
@@ -51,7 +51,7 @@ red='\e[1;31m'
 green='\e[0;32m'
 yell='\e[1;33m'
 NC='\e[0m'
-curl -sS https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/resources/ascii-home
+curl -sS https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/resources/ascii-home
 echo "XRAY Core Vmess / Vless"
 echo "Trojan / Trojan Go"
 echo "Progress..."
@@ -97,11 +97,11 @@ touch /etc/trojan-go/akun.conf >/dev/null 2>&1
 # install xray
 sleep 1
 echo -e "[ ${green}INFO$NC ] Downloading & Installing xray core"
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/core/xray-core.sh" && chmod +x xray-core.sh && ./xray-core.sh >/dev/null 2>&1
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/core/xray-core.sh" && chmod +x xray-core.sh && ./xray-core.sh >/dev/null 2>&1
 rm -f xray-core.sh
 sleep 1
 echo -e "[ ${green}INFO$NC ] Downloading & Installing Trojan-Go"
-wget -q "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/ins-trojango.sh" && chmod +x ins-trojango.sh && ./ins-trojango.sh
+wget -q "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/ins-trojango.sh" && chmod +x ins-trojango.sh && ./ins-trojango.sh
 rm -f /root/ins-trojango.sh
 mkdir -p /root/.acme.sh >/dev/null 2>&1
 sleep 1
@@ -852,7 +852,7 @@ EOF
 
 sleep 1
 echo -e "[ ${green}INFO$NC ] Installing bbr.."
-wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/dll/bbr.sh"
+wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/dll/bbr.sh"
 chmod +x /usr/bin/bbr
 bbr >/dev/null 2>&1
 rm /usr/bin/bbr >/dev/null 2>&1
@@ -908,52 +908,52 @@ systemctl restart trojan-grpc >/dev/null 2>&1
 
 sleep 1
 echo -e "[ ${green}ok${NC} ] Downloading files for trojan-go... "
-wget -q -O /usr/bin/add-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-ws.sh" && chmod +x /usr/bin/add-ws
-wget -q -O /usr/bin/add-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-vless.sh" && chmod +x /usr/bin/add-vless
-wget -q -O /usr/bin/add-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-tr.sh" && chmod +x /usr/bin/add-tr
-wget -q -O /usr/bin/del-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-ws.sh" && chmod +x /usr/bin/del-ws
-wget -q -O /usr/bin/del-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-vless.sh" && chmod +x /usr/bin/del-vless
-wget -q -O /usr/bin/del-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-tr.sh" && chmod +x /usr/bin/del-tr
-wget -q -O /usr/bin/cek-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-ws.sh" && chmod +x /usr/bin/cek-ws
-wget -q -O /usr/bin/cek-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-vless.sh" && chmod +x /usr/bin/cek-vless
-wget -q -O /usr/bin/cek-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-tr.sh" && chmod +x /usr/bin/cek-tr
-wget -q -O /usr/bin/renew-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-ws.sh" && chmod +x /usr/bin/renew-ws
-wget -q -O /usr/bin/renew-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-vless.sh" && chmod +x /usr/bin/renew-vless
-wget -q -O /usr/bin/renew-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-tr.sh" && chmod +x /usr/bin/renew-tr
-wget -q -O /usr/bin/trial-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/trial-ws.sh" && chmod +x /usr/bin/trial-ws
-wget -q -O /usr/bin/trial-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/trial-vless.sh" && chmod +x /usr/bin/trial-vless
-wget -q -O /usr/bin/trial-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/trial-tr.sh" && chmod +x /usr/bin/trial-tr
-wget -q -O /usr/bin/port-ws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-ws.sh" && chmod +x /usr/bin/port-ws
-wget -q -O /usr/bin/port-vless "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-vless.sh" && chmod +x /usr/bin/port-vless
-wget -q -O /usr/bin/port-tr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-tr.sh" && chmod +x /usr/bin/port-tr
+wget -q -O /usr/bin/add-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-ws.sh" && chmod +x /usr/bin/add-ws
+wget -q -O /usr/bin/add-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-vless.sh" && chmod +x /usr/bin/add-vless
+wget -q -O /usr/bin/add-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-tr.sh" && chmod +x /usr/bin/add-tr
+wget -q -O /usr/bin/del-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-ws.sh" && chmod +x /usr/bin/del-ws
+wget -q -O /usr/bin/del-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-vless.sh" && chmod +x /usr/bin/del-vless
+wget -q -O /usr/bin/del-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-tr.sh" && chmod +x /usr/bin/del-tr
+wget -q -O /usr/bin/cek-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-ws.sh" && chmod +x /usr/bin/cek-ws
+wget -q -O /usr/bin/cek-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-vless.sh" && chmod +x /usr/bin/cek-vless
+wget -q -O /usr/bin/cek-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-tr.sh" && chmod +x /usr/bin/cek-tr
+wget -q -O /usr/bin/renew-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-ws.sh" && chmod +x /usr/bin/renew-ws
+wget -q -O /usr/bin/renew-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-vless.sh" && chmod +x /usr/bin/renew-vless
+wget -q -O /usr/bin/renew-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-tr.sh" && chmod +x /usr/bin/renew-tr
+wget -q -O /usr/bin/trial-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/trial-ws.sh" && chmod +x /usr/bin/trial-ws
+wget -q -O /usr/bin/trial-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/trial-vless.sh" && chmod +x /usr/bin/trial-vless
+wget -q -O /usr/bin/trial-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/trial-tr.sh" && chmod +x /usr/bin/trial-tr
+wget -q -O /usr/bin/port-ws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-ws.sh" && chmod +x /usr/bin/port-ws
+wget -q -O /usr/bin/port-vless "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-vless.sh" && chmod +x /usr/bin/port-vless
+wget -q -O /usr/bin/port-tr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-tr.sh" && chmod +x /usr/bin/port-tr
 
-wget -q -O /usr/bin/renewcert "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cert.sh" && chmod +x /usr/bin/renewcert
+wget -q -O /usr/bin/renewcert "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cert.sh" && chmod +x /usr/bin/renewcert
 #===baru===
-wget -q -O /usr/bin/add-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/add-trgo.sh" && chmod +x /usr/bin/add-trgo
-wget -q -O /usr/bin/renew-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/renew-trgo.sh" && chmod +x /usr/bin/renew-trgo
-wget -q -O /usr/bin/cek-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/cek-trgo.sh" && chmod +x /usr/bin/cek-trgo
-wget -q -O /usr/bin/del-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/del-trgo.sh" && chmod +x /usr/bin/del-trgo
-wget -q -O /usr/bin/trial-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/trial-trgo.sh" && chmod +x /usr/bin/trial-trgo
-wget -q -O /usr/bin/port-trgo "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/trojan/port-trgo.sh" && chmod +x /usr/bin/port-trgo
+wget -q -O /usr/bin/add-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/add-trgo.sh" && chmod +x /usr/bin/add-trgo
+wget -q -O /usr/bin/renew-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/renew-trgo.sh" && chmod +x /usr/bin/renew-trgo
+wget -q -O /usr/bin/cek-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/cek-trgo.sh" && chmod +x /usr/bin/cek-trgo
+wget -q -O /usr/bin/del-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/del-trgo.sh" && chmod +x /usr/bin/del-trgo
+wget -q -O /usr/bin/trial-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/trial-trgo.sh" && chmod +x /usr/bin/trial-trgo
+wget -q -O /usr/bin/port-trgo "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/trojan/port-trgo.sh" && chmod +x /usr/bin/port-trgo
 
-wget -q -O /usr/bin/v2ray-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/v2ray-menu.sh" && chmod +x /usr/bin/v2ray-menu
-wget -q -O /usr/bin/trojan-menu "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/menu_all/trojan-menu.sh" && chmod +x /usr/bin/trojan-menu
+wget -q -O /usr/bin/v2ray-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/v2ray-menu.sh" && chmod +x /usr/bin/v2ray-menu
+wget -q -O /usr/bin/trojan-menu "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/menu_all/trojan-menu.sh" && chmod +x /usr/bin/trojan-menu
 
-wget -q -O /usr/bin/add-grws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-grws.sh" && chmod +x /usr/bin/add-grws
-wget -q -O /usr/bin/add-grvl "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-grvl.sh" && chmod +x /usr/bin/add-grvl
-wget -q -O /usr/bin/add-grtr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/add-grtr.sh" && chmod +x /usr/bin/add-grtr
-wget -q -O /usr/bin/del-grws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-grws.sh" && chmod +x /usr/bin/del-grws
-wget -q -O /usr/bin/del-grvl "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-grvl.sh" && chmod +x /usr/bin/del-grvl
-wget -q -O /usr/bin/del-grtr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/del-grtr.sh" && chmod +x /usr/bin/del-grtr
-wget -q -O /usr/bin/cek-grws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-grws.sh" && chmod +x /usr/bin/cek-grws
-wget -q -O /usr/bin/cek-grvl "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-grvl.sh" && chmod +x /usr/bin/cek-grvl
-wget -q -O /usr/bin/cek-grtr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/cek-grtr.sh" && chmod +x /usr/bin/cek-grtr
-wget -q -O /usr/bin/renew-grws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-grws.sh" && chmod +x /usr/bin/renew-grws
-wget -q -O /usr/bin/renew-grvl "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-grvl.sh" && chmod +x /usr/bin/renew-grvl
-wget -q -O /usr/bin/renew-grtr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/renew-ws.sh" && chmod +x /usr/bin/renew-grtr
-wget -q -O /usr/bin/port-grws "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-grws.sh" && chmod +x /usr/bin/port-grws
-wget -q -O /usr/bin/port-grvl "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-grvl.sh" && chmod +x /usr/bin/port-grvl
-wget -q -O /usr/bin/port-grtr "https://raw.githubusercontent.com/syfqsamvpn/scriptvps/main/xray/port-grtr.sh" && chmod +x /usr/bin/port-grtr
+wget -q -O /usr/bin/add-grws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-grws.sh" && chmod +x /usr/bin/add-grws
+wget -q -O /usr/bin/add-grvl "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-grvl.sh" && chmod +x /usr/bin/add-grvl
+wget -q -O /usr/bin/add-grtr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/add-grtr.sh" && chmod +x /usr/bin/add-grtr
+wget -q -O /usr/bin/del-grws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-grws.sh" && chmod +x /usr/bin/del-grws
+wget -q -O /usr/bin/del-grvl "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-grvl.sh" && chmod +x /usr/bin/del-grvl
+wget -q -O /usr/bin/del-grtr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/del-grtr.sh" && chmod +x /usr/bin/del-grtr
+wget -q -O /usr/bin/cek-grws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-grws.sh" && chmod +x /usr/bin/cek-grws
+wget -q -O /usr/bin/cek-grvl "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-grvl.sh" && chmod +x /usr/bin/cek-grvl
+wget -q -O /usr/bin/cek-grtr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/cek-grtr.sh" && chmod +x /usr/bin/cek-grtr
+wget -q -O /usr/bin/renew-grws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-grws.sh" && chmod +x /usr/bin/renew-grws
+wget -q -O /usr/bin/renew-grvl "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-grvl.sh" && chmod +x /usr/bin/renew-grvl
+wget -q -O /usr/bin/renew-grtr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/renew-ws.sh" && chmod +x /usr/bin/renew-grtr
+wget -q -O /usr/bin/port-grws "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-grws.sh" && chmod +x /usr/bin/port-grws
+wget -q -O /usr/bin/port-grvl "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-grvl.sh" && chmod +x /usr/bin/port-grvl
+wget -q -O /usr/bin/port-grtr "https://raw.githubusercontent.com/kenzozairul-dev/new-vps-2026/main/xray/port-grtr.sh" && chmod +x /usr/bin/port-grtr
 sleep 1
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
 yellow "xray/Vmess"
