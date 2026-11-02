@@ -997,7 +997,308 @@
     openDrawer: openDrawer,
     closeDrawer: closeDrawer,
     openModal: openModal,
-    closeModal: closeModal
+    closeModal: closeModal,
+    toast: toast,
+    statusMeta: statusMeta,
+    setActiveService: function (key) { activeService = key; },
+    getActiveService: function () { return activeService; },
+    renderDrawer: renderDrawer,
+    setTab: setTab
   };
+
+  /* ===========================================================================
+     LIVE MODE — connect to VPS panel API (api.js). When VPSAPI.available is
+     false (file:// demo), the simulated behaviour above stays in effect.
+     ========================================================================== */
+  (function () {
+    if (!window.VPSAPI || !window.VPSAPI.available) {
+      showBanner(false);
+      return;
+    }
+    showBanner(true);
+
+    var API = window.VPSAPI;
+    var loginScrim = $('#loginScrim');
+    var loginForm = $('#loginForm');
+    var loginPass = $('#loginPass');
+    var loginError = $('#loginError');
+    var loginSubmit = $('#loginSubmit');
+    var authed = false;
+
+    // service id -> (systemd unit, fallback pgrep pattern) used for restart
+    var UNIT_MAP = {
+      ssh: 'ssh', xray: 'xray', v2ray: 'v2ray', trojan: 'xray', 'trojan-go': 'trojan-go',
+      wireguard: 'wg-quick@wg0', sstp: 'accel-ppp', l2tp: 'xl2tpd', pptp: 'pptpd',
+      ss: 'shadowsocks-libev', ssr: 'ssrmu'
+    };
+    // card id -> api account svc key
+    var ACCT_MAP = { ssh: 'ssh', xray: 'xray', trojan: 'xray', wireguard: 'wireguard', ss: 'ss', shadowsocks: 'ss' };
+
+    function showBanner(live) {
+      var topbar = $('#topbar');
+      var b = document.createElement('div');
+      b.className = 'conn-banner ' + (live ? 'conn-banner--live' : 'conn-banner--demo');
+      var txt = live
+        ? 'Live — bersambung ke VPS melalui <code class="mono">api.php</code>'
+        : 'DEMO — data simulasi (buka panel melalui nginx untuk sambungan sebenar)';
+      b.innerHTML = '<i class="conn-banner__dot" aria-hidden="true"></i><span>' + txt + '</span>';
+      topbar.parentNode.insertBefore(b, topbar);
+    }
+
+    function showLogin() {
+      loginScrim.hidden = false;
+      loginError.hidden = true;
+      loginPass.value = '';
+      loginPass.focus();
+    }
+    function hideLogin() {
+      loginScrim.hidden = true;
+    }
+
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      loginError.hidden = true;
+      loginSubmit.disabled = true;
+      loginSubmit.textContent = 'Memeriksa…';
+      API.login(loginPass.value).then(function () {
+        authed = true;
+        hideLogin();
+        loadAll();
+      }).catch(function (err) {
+        loginError.textContent = err.message || 'Salah kata laluan';
+        loginError.hidden = false;
+        loginPass.select();
+      }).finally(function () {
+        loginSubmit.disabled = false;
+        loginSubmit.textContent = 'Masuk';
+      });
+    });
+
+    // ---- repopulate UI from live data ----
+    function fmtBytes(n) {
+      if (!n || n <= 0) return '—';
+      var u = ['B','KB','MB','GB','TB']; var i = 0; var v = n;
+      while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+      return v.toFixed(v >= 100 ? 0 : 1) + ' ' + u[i];
+    }
+    function fmtUptime(sec) {
+      var d = Math.floor(sec / 86400); sec -= d * 86400;
+      var h = Math.floor(sec / 3600); sec -= h * 3600;
+      var m = Math.floor(sec / 60);
+      return (d ? d + 'd ' : '') + h + 'h ' + m + 'm';
+    }
+
+    function applySystem(sys) {
+      if (sys.ip) {
+        $('#serverIp').textContent = sys.ip;
+        var ipBtn = document.querySelector('.ip-row .copy-btn');
+        if (ipBtn) ipBtn.setAttribute('data-copy', sys.ip);
+      }
+      var domain = document.querySelector('.domain');
+      if (domain && sys.domain) domain.textContent = sys.domain;
+      var coreChip = document.querySelector('.chip--core');
+      if (coreChip && sys.core) coreChip.textContent = sys.core;
+
+      // meta grid
+      var metaDds = $$('.meta-grid dd');
+      if (sys.uptime_sec != null && metaDds[0]) metaDds[0].textContent = fmtUptime(sys.uptime_sec);
+      if (sys.os && metaDds[1]) metaDds[1].textContent = sys.os;
+      if (sys.kernel && metaDds[2]) metaDds[2].textContent = sys.kernel;
+      if (sys.region && metaDds[3]) metaDds[3].textContent = sys.region;
+
+      // KPIs
+      var memPct = sys.mem.total > 0 ? Math.round(sys.mem.used / sys.mem.total * 100) : 0;
+      var diskPct = sys.disk.total > 0 ? Math.round(sys.disk.used / sys.disk.total * 100) : 0;
+      var cpuPct = sys.load && sys.load[0] != null ? Math.round(sys.load[0] * 100 / Math.max(1, sys.cpu_cores)) : 0;
+      setKpi(0, cpuPct + '%', (sys.load ? sys.load[0].toFixed(2) : '—'), '/ ' + (sys.cpu_cores || 2) + ' core');
+      setKpi(1, memPct + '%', (sys.mem.total > 0 ? (sys.mem.used/1073741824).toFixed(1) : '—'), '/ ' + (sys.mem.total/1073741824).toFixed(1) + ' GB');
+      setKpi(2, diskPct + '%', (sys.disk.total > 0 ? (sys.disk.used/1073741824).toFixed(1) : '—'), '/ ' + (sys.disk.total/1073741824).toFixed(0) + ' GB');
+
+      if (sys.update_available) {
+        $('#menuUpdate').classList.remove('hidden');
+      }
+    }
+
+    function setKpi(idx, pctText, valueText, unitText) {
+      var kpis = $$('.kpi');
+      if (!kpis[idx]) return;
+      var kpi = kpis[idx];
+      var pct = kpi.querySelector('.kpi__pct');
+      var value = kpi.querySelector('.num');
+      var unit = kpi.querySelector('.kpi__unit');
+      if (pct) pct.textContent = pctText;
+      if (value) { value.textContent = valueText; value.removeAttribute('data-count'); }
+      if (unit) unit.textContent = unitText;
+    }
+
+    function applyServices(list) {
+      var running = 0, total = 0;
+      list.forEach(function (s) {
+        var card = document.querySelector('.svc-card[data-service="' + s.id + '"]');
+        var mapId = s.id === 'v2ray' ? 'xray' : (s.id === 'xray' ? 'xray' : s.id);
+        if (!card && (s.id === 'xray' || s.id === 'v2ray')) {
+          // core could be either; xray card is static
+          card = document.querySelector('.svc-card[data-service="xray"]');
+        }
+        var status = !s.installed ? 'empty' : (s.running ? 'running' : 'stopped');
+        var meta = statusMeta(status);
+        if (card) {
+          var pill = card.querySelector('.pill');
+          if (pill) {
+            pill.className = 'pill ' + meta.pill;
+            pill.innerHTML = '<i class="pill__dot" aria-hidden="true"></i>' + meta.label;
+          }
+          card.classList.toggle('svc-card--stopped', status === 'stopped');
+          card.classList.toggle('svc-card--empty', status === 'empty');
+        }
+        // keep the SERVICES object in sync so the drawer reflects live state
+        var key = (s.id === 'xray' || s.id === 'v2ray') ? 'xray' : (s.id === 'shadowsocks-libev' ? 'shadowsocks' : s.id);
+        if (SERVICES[key]) {
+          SERVICES[key].status = status;
+          SERVICES[key].systemd = s.unit + ' · ' + (s.running ? 'active (running)' : 'inactive');
+          SERVICES[key].uptime = s.running ? 'up — live' : (s.installed ? 'stopped' : 'not installed');
+        }
+        if (s.installed) { total++; if (s.running) running++; }
+      });
+      $('#svcRunning').textContent = running;
+      $('#svcTotal').textContent = total;
+    }
+
+    function applyAccounts(svc, list) {
+      var key = svc;
+      if (svc === 'xray' || svc === 'v2ray') key = 'xray';
+      if (svc === 'ss') key = 'shadowsocks';
+      if (!SERVICES[key]) return;
+      SERVICES[key].accounts = list.map(function (a) {
+        return {
+          user: a.user, exp: a.exp || '—', days: a.days == null ? 999 : a.days,
+          quota: a.quota || 0, used: a.used || '—', login: '—', online: !!a.online
+        };
+      });
+      // update card user count
+      var card = document.querySelector('.svc-card[data-service="' + key + '"]');
+      if (card) {
+        var b = card.querySelector('.svc-card__stat b');
+        if (b) b.textContent = list.length || '—';
+      }
+      // refresh drawer if it's open on this service
+      if (activeService === key) renderDrawer(SERVICES[key]);
+    }
+
+    function loadAccountsForVisible() {
+      var seen = {};
+      Object.keys(ACCT_MAP).forEach(function (cardId) {
+        var svcKey = ACCT_MAP[cardId];
+        if (seen[svcKey]) return; seen[svcKey] = true;
+        API.accounts(svcKey).then(function (r) { applyAccounts(svcKey, r.accounts); }).catch(function () {});
+      });
+    }
+
+    function loadAll() {
+      API.system().then(applySystem).catch(function () { toast('Gagal ambil status sistem', 'warn'); });
+      API.services().then(function (r) { applyServices(r.services); loadAccountsForVisible(); }).catch(function () {});
+      // live log tail from real log file
+      startLiveLog();
+    }
+
+    // ---- live log tail from /etc/log-create-user.log ----
+    var logTimer = null, logPaused = false;
+    function startLiveLog() {
+      // replace the synthetic seed log with real tail (append-only view)
+      $('#logLines').innerHTML = '';
+      fetchLog();
+      logTimer = window.setInterval(fetchLog, 5000);
+      $('#logPause').addEventListener('click', function () {
+        logPaused = !logPaused;
+        if (logPaused) window.clearInterval(logTimer); else { fetchLog(); logTimer = window.setInterval(fetchLog, 5000); }
+      });
+    }
+    function fetchLog() {
+      API.logs(80, 'user').then(function (r) {
+        var lines = (r.lines || []).map(function (ln) { return ln; });
+        var el = $('#logLines');
+        el.innerHTML = '';
+        lines.forEach(function (ln) {
+          if (!ln.trim()) return;
+          var li = document.createElement('li');
+          var lvl = /error|denied|fail/i.test(ln) ? 'ERROR' : (/warn/i.test(ln) ? 'WARN' : 'INFO');
+          li.setAttribute('data-level', lvl);
+          var cls = lvl === 'ERROR' ? 'error' : (lvl === 'WARN' ? 'warn' : 'info');
+          li.innerHTML = '<span class="log__tag log__tag--' + cls + '">' + lvl + '</span>' +
+            '<span class="log__msg"></span>';
+          li.querySelector('.log__msg').textContent = ln;
+          el.appendChild(li);
+        });
+        $('#logCount').textContent = el.children.length;
+        var s = $('#logStream');
+        s.scrollTop = s.scrollHeight;
+      }).catch(function () {});
+    }
+
+    // ---- real management actions (capture phase overrides simulated) ----
+    function liveAccountsHandler(e) {
+      var btn = e.target.closest('.row-btn');
+      if (!btn) return;
+      e.stopPropagation();
+      e.preventDefault();
+      var user = btn.getAttribute('data-user');
+      var act = btn.getAttribute('data-act');
+      var svc = ACCT_MAP[activeService] || 'ssh';
+      if (act === 'renew') {
+        API.renewAccount(svc, user, 30).then(function () {
+          toast('Renewed ' + user + ' · +30 hari', 'info');
+          API.accounts(svc).then(function (r) { applyAccounts(svc, r.accounts); });
+        }).catch(function (err) { toast(err.message, 'warn'); });
+      } else if (act === 'delete') {
+        if (!window.confirm('Padam akaun ' + user + '? Tindakan ini kekal.')) return;
+        API.deleteAccount(svc, user).then(function () {
+          toast('Akaun ' + user + ' dipadam', 'warn');
+          API.accounts(svc).then(function (r) { applyAccounts(svc, r.accounts); });
+        }).catch(function (err) { toast(err.message, 'warn'); });
+      }
+    }
+    document.addEventListener('click', liveAccountsHandler, true);
+
+    var svcRestartBtn = $('#svcRestart');
+    svcRestartBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var unit = UNIT_MAP[activeService];
+      if (!unit) { toast('Tiada unit untuk servis ini', 'warn'); return; }
+      API.restartService(unit).then(function (r) {
+        toast(r.ok ? 'Servis ' + unit + ' restart' : (r.message || 'Gagal restart'), r.ok ? 'info' : 'warn');
+        API.services().then(function (res) { applyServices(res.services); });
+      }).catch(function (err) { toast(err.message, 'warn'); });
+    }, true);
+
+    var addUserBtn = $('#addUserBtn');
+    addUserBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (activeService !== 'ssh') {
+        toast('Tambah user hanya untuk SSH buat masa ini (servis lain guna CLI)', 'warn');
+        return;
+      }
+      var user = window.prompt('Username SSH baru:');
+      if (!user) return;
+      var days = parseInt(window.prompt('Tempoh (hari):', '30'), 10) || 30;
+      API.createAccount('ssh', { user: user, days: days }).then(function (r) {
+        toast('User ' + r.user + ' dicipta · tamat ' + (r.exp || days + 'd'), 'info');
+        API.accounts('ssh').then(function (res) { applyAccounts('ssh', res.accounts); });
+      }).catch(function (err) { toast(err.message, 'warn'); });
+    }, true);
+
+    // session check on load
+    API.session().then(function (r) {
+      if (r && r.authed) { authed = true; loadAll(); }
+      else { showLogin(); }
+    }).catch(function () {
+      // api unreachable — stay in demo with a note
+      showBanner(false);
+      toast('API tidak dapat dihubungi — data simulasi', 'warn');
+    });
+
+    // mark the connection indicator as live
+    var conn = document.querySelector('.conn');
+    if (conn) conn.classList.add('is-live');
+  })();
 })();
 
