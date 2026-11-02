@@ -102,7 +102,13 @@ ln -sf "/etc/nginx/sites-available/${SITE}" "/etc/nginx/sites-enabled/${SITE}"
 rm -f /etc/nginx/sites-enabled/default
 
 nginx -t >/dev/null 2>&1 || die "Konfigurasi nginx tidak sah."
-systemctl reload nginx
+
+# Start nginx if it isn't running (fresh install), reload if already up.
+if systemctl is-active --quiet nginx; then
+  systemctl reload nginx
+else
+  systemctl enable --now nginx >/dev/null 2>&1 || nginx
+fi
 systemctl enable --now php*-fpm >/dev/null 2>&1 || systemctl restart php-fpm
 
 ok "Panel dipasang."
