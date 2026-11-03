@@ -1484,6 +1484,38 @@ kbd {
 }
 @keyframes cursorBlink { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
 
+/* =============================================================================
+   XRAY "LOGIN" TAB
+   ========================================================================== */
+.xlogin { display: flex; flex-direction: column; gap: .9rem; }
+.xlogin__user {
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface-2); padding: .8rem .9rem;
+}
+.xlogin__head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.xlogin__name { font-weight: 650; font-size: .95rem; }
+.xlogin__exp { font-size: .74rem; color: var(--text-dim); }
+.xlogin__badge {
+  font-size: .64rem; letter-spacing: .06em; padding: .16rem .44rem; border-radius: 999px;
+  border: 1px solid var(--border-strong);
+}
+.xlogin__badge--on { color: var(--signal); border-color: rgba(61,220,151,.35); background: rgba(61,220,151,.08); }
+.xlogin__badge--off { color: var(--text-faint); }
+.xlogin__row {
+  display: flex; gap: .5rem; align-items: baseline; flex-wrap: wrap;
+  font-size: .78rem; color: var(--text-dim); margin-top: .3rem;
+}
+.xlogin__k { min-width: 62px; color: var(--text-faint); font-size: .68rem; letter-spacing: .06em; }
+.xlogin__ips { display: flex; gap: .35rem; flex-wrap: wrap; }
+.xlogin__ip {
+  font-size: .74rem; padding: .12rem .42rem; border-radius: 5px;
+  background: var(--surface-3); border: 1px solid var(--border); color: var(--text-dim);
+}
+.xlogin__ip--on { color: var(--signal); border-color: rgba(61,220,151,.3); }
+.xlogin__files { display: flex; flex-direction: column; gap: .16rem; }
+.xlogin__file { font-size: .72rem; color: var(--text-dim); word-break: break-all; }
+.xlogin__none { font-size: .72rem; color: var(--text-faint); }
+
 
 
 

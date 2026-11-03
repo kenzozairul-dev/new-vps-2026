@@ -1278,6 +1278,90 @@
       if (activeService === key) renderDrawer(SERVICES[key]);
     }
 
+    // ---- Xray "Login" tab: registered users + active IPs + generated files ----
+    var loginTab = $('#tab-login');
+    var loginBody = $('#loginBody');
+    var loginEmpty = $('#loginEmpty');
+
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function renderXrayLogin(data) {
+      var users = (data && data.users) || [];
+      if (!users.length) {
+        loginBody.innerHTML = '';
+        loginEmpty.hidden = false;
+        $('#tabLoginCount').textContent = '0';
+        return;
+      }
+      loginEmpty.hidden = true;
+      $('#tabLoginCount').textContent = String(users.length);
+
+      loginBody.innerHTML = '<div class="xlogin">' + users.map(function (u) {
+        var online = u.online;
+        var badge = online
+          ? '<span class="xlogin__badge xlogin__badge--on">ONLINE</span>'
+          : '<span class="xlogin__badge xlogin__badge--off">OFFLINE</span>';
+        var expTxt = u.exp ? ('exp ' + u.exp + (u.days != null ? ' · ' + u.days + 'd' : '')) : '—';
+
+        var ips = (u.ips && u.ips.length)
+          ? u.ips.map(function (x) {
+              return '<span class="xlogin__ip' + (x.online ? ' xlogin__ip--on' : '') + '">' + escHtml(x.ip) + '</span>';
+            }).join('')
+          : '<span class="xlogin__none">tiada IP aktif</span>';
+
+        var files = (u.files && u.files.length)
+          ? u.files.map(function (f) { return '<span class="xlogin__file mono">' + escHtml(f) + '</span>'; }).join('')
+          : '<span class="xlogin__none">tiada fail</span>';
+
+        return '<div class="xlogin__user">' +
+          '<div class="xlogin__head">' +
+            '<span class="xlogin__name mono">' + escHtml(u.user) + '</span>' +
+            badge +
+            '<span class="xlogin__exp mono">' + escHtml(expTxt) + '</span>' +
+          '</div>' +
+          '<div class="xlogin__row"><span class="xlogin__k mono">IP</span><span class="xlogin__ips">' + ips + '</span></div>' +
+          '<div class="xlogin__row"><span class="xlogin__k mono">FILES</span><span class="xlogin__files">' + files + '</span></div>' +
+        '</div>';
+      }).join('') + '</div>';
+
+      if (data.other && data.other.length) {
+        loginBody.insertAdjacentHTML('beforeend',
+          '<p class="drawer__note" style="margin-top:.8rem">Other IP (tidak padan user): <span class="mono">' +
+          data.other.map(escHtml).join(', ') + '</span></p>');
+      }
+    }
+
+    function refreshLoginTab() {
+      var isXray = (activeService === 'xray' || activeService === 'trojan');
+      loginTab.hidden = !isXray;
+      if (!isXray) return;
+      API.xrayDetail().then(function (r) {
+        renderXrayLogin(r);
+      }).catch(function () {
+        loginBody.innerHTML = '';
+        loginEmpty.hidden = false;
+      });
+    }
+
+    // hook: whenever the drawer opens (card click, number key, API), refresh the Login tab
+    var drawerEl = $('#drawer');
+    var lastDrawerOpen = false;
+    var drawerObserver = new MutationObserver(function () {
+      var open = drawerEl.classList.contains('is-open');
+      if (open && !lastDrawerOpen) {
+        // read which service is active from the drawer title / exposed hook
+        var key = (window.__VPS_MENU__.getActiveService && window.__VPS_MENU__.getActiveService()) || '';
+        activeService = key;
+        refreshLoginTab();
+      }
+      lastDrawerOpen = open;
+    });
+    drawerObserver.observe(drawerEl, { attributes: true, attributeFilter: ['class'] });
+
     function loadAccountsForVisible() {
       var seen = {};
       Object.keys(ACCT_MAP).forEach(function (cardId) {

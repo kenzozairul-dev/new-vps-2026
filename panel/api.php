@@ -217,6 +217,11 @@ case 'accounts': {
     out(['ok'=>true,'svc'=>$svc,'accounts'=>list_accounts($svc)]);
 }
 
+case 'xray_detail': {
+    require_auth();
+    out(['ok'=>true,'users'=>xray_detail()]);
+}
+
 // ============ MANAGEMENT ============
 case 'account_create': {
     require_auth();
@@ -430,6 +435,69 @@ function xray_accounts(): array {
     }
 
     return array_values($byUser);
+}
+
+/**
+ * Xray "Check User Login": registered users + their active IPs from the access log
+ * + the config/link files created for each user.
+ */
+function xray_detail(): array {
+    $cfg = xray_config_file();
+    $users = xray_accounts();
+    if (!$users) return [];
+
+    // access log lines: "<ts> from <ip>:<port> accepted tcp:... email: <user>" (core-dependent)
+    $logFile = '/var/log/xray/access.log';
+    if (!is_file($logFile)) $logFile = '/var/log/v2ray/access.log';
+    $logLines = is_file($logFile) ? (array)@file($logFile, FILE_IGNORE_NEW_LINES) : [];
+
+    // currently established client IPs (xray/v2ray sockets)
+    $est = [];
+    $estRaw = sh("netstat -anp 2>/dev/null | grep ESTABLISHED | grep -E 'xray|v2ray' | awk '{print \$5}' | cut -d: -f1 | sort -u");
+    foreach (explode("\n", $estRaw) as $ip) { $ip = trim($ip); if ($ip !== '') $est[$ip] = true; }
+
+    $out = [];
+    foreach ($users as $u) {
+        $name = $u['user'];
+        $ips = [];
+        // scan the last 5000 log lines for this user's IPs
+        $tail = array_slice($logLines, -5000);
+        foreach ($tail as $ln) {
+            if (strpos($ln, $name) === false) continue;
+            if (preg_match('/from\s+([0-9a-fA-F:.]+):\d+/', $ln, $m)) {
+                $ips[$m[1]] = true;
+            } elseif (preg_match('/\s([0-9]{1,3}(?:\.[0-9]{1,3}){3}):\d+/', $ln, $m)) {
+                $ips[$m[1]] = true;
+            }
+        }
+        $ipList = array_keys($ips);
+        sort($ipList);
+        foreach ($ipList as &$ip) { $ip = ['ip'=>$ip, 'online'=>isset($est[$ip])]; }
+        unset($ip);
+
+        // files created for this user
+        $files = [];
+        foreach ((array)glob("/etc/xray/{$name}-*.json") as $f) { $files[] = $f; }
+        foreach ((array)glob("/etc/v2ray/{$name}-*.json") as $f) { $files[] = $f; }
+        foreach ((array)glob("/home/vps/public_html/{$name}.*") as $f) { $files[] = $f; }
+
+        $out[] = [
+            'user' => $name,
+            'exp' => $u['exp'],
+            'days' => $u['days'],
+            'ips' => $ipList,
+            'online' => (bool)array_filter($ipList, function ($x) { return $x['online']; }),
+            'files' => array_values(array_unique($files)),
+        ];
+    }
+
+    // IPs seen in the log that don't belong to any registered user
+    $known = [];
+    foreach ($out as $o) { foreach ($o['ips'] as $x) { $known[$x['ip']] = true; } }
+    $other = [];
+    foreach (array_keys($est) as $ip) { if (!isset($known[$ip])) $other[] = $ip; }
+
+    return ['users'=>$out, 'other'=>$other];
 }
 
 function ss_accounts(): array {

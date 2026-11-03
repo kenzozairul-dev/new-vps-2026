@@ -500,6 +500,7 @@
     <button class="tab" role="tab" id="tab-accounts" aria-controls="panel-accounts" aria-selected="true" tabindex="0" type="button">Accounts <span class="tab__count mono" id="tabAccountCount">6</span></button>
     <button class="tab" role="tab" id="tab-ports" aria-controls="panel-ports" aria-selected="false" tabindex="-1" type="button">Ports <span class="tab__count mono" id="tabPortCount">4</span></button>
     <button class="tab" role="tab" id="tab-config" aria-controls="panel-config" aria-selected="false" tabindex="-1" type="button">Config</button>
+    <button class="tab" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="false" tabindex="-1" type="button" hidden>Login <span class="tab__count mono" id="tabLoginCount">0</span></button>
   </div>
 
   <div class="drawer__body">
@@ -548,6 +549,15 @@
       </div>
       <pre class="code" id="cfgCode" tabindex="0" aria-label="Read-only service configuration"></pre>
       <p class="drawer__note">Read-only preview. Edit via <span class="mono">vps-setting</span> on the server.</p>
+    </section>
+
+    <section class="tabpanel" role="tabpanel" id="panel-login" aria-labelledby="tab-login" tabindex="0" hidden>
+      <p class="drawer__note">User berdaftar, IP yang sedang login (dari <span class="mono">access.log</span>), dan fail yang dijana untuk setiap user.</p>
+      <div id="loginBody"></div>
+      <div class="empty" id="loginEmpty" hidden>
+        <p class="empty__title">Tiada data login</p>
+        <p class="empty__body">Tiada user Xray berdaftar atau log akses belum tersedia.</p>
+      </div>
     </section>
   </div>
 
