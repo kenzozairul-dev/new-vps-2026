@@ -222,6 +222,19 @@ case 'xray_detail': {
     out(['ok'=>true,'users'=>xray_detail()]);
 }
 
+// Senarai username + password yang pernah dicipta (dari /etc/log-create-user.log)
+case 'created_users': {
+    require_auth();
+    $search = trim((string)(input()['q'] ?? ''));
+    $rows = parse_create_log();
+    if ($search !== '') {
+        $rows = array_values(array_filter($rows, function ($r) use ($search) {
+            return stripos($r['user'], $search) !== false;
+        }));
+    }
+    out(['ok'=>true,'count'=>count($rows),'users'=>$rows]);
+}
+
 // ============ MANAGEMENT ============
 case 'account_create': {
     require_auth();
@@ -538,6 +551,64 @@ function list_accounts(string $svc): array {
 
 function log_action(string $msg): void {
     @file_put_contents('/etc/log-create-user.log', '[' . date('Y-m-d H:i:s') . "] [PANEL] $msg\n", FILE_APPEND);
+}
+
+/**
+ * Parse /etc/log-create-user.log into blocks of created accounts.
+ * Blocks look like:
+ *   ⇱ SSH Account ⇲
+ *   Username : ali
+ *   Password : 12345
+ *   Expired On : 2026-12-01
+ * Separated by ━━━ rule lines.
+ */
+function parse_create_log(): array {
+    $path = '/etc/log-create-user.log';
+    $rows = [];
+    if (!is_file($path)) return $rows;
+
+    $lines = array_values(array_filter((array)@file($path, FILE_IGNORE_NEW_LINES), 'strlen'));
+    $cur = null;
+
+    $flush = function () use (&$cur, &$rows) {
+        if ($cur === null) return;
+        if (!empty($cur['user']) || !empty($cur['pass'])) {
+            $rows[] = $cur;
+        }
+        $cur = null;
+    };
+
+    foreach ($lines as $raw) {
+        $line = trim(preg_replace('/\s+/', ' ', $raw));
+
+        // decorative rule -> block boundary
+        if (preg_match('/^[━─=_\-·•]{6,}$/u', $line) || $line === '') {
+            // only flush on a closing rule if we already have data
+            if ($cur !== null && (!empty($cur['user']) || !empty($cur['pass'])) && preg_match('/^[━─=_\-·•]{6,}$/u', $line)) {
+                $flush();
+            }
+            continue;
+        }
+
+        // service header like "⇱ SSH Account ⇲" / "⇱ Xray/Vmess Account ⇲"
+        if (preg_match('/[⇱⟪«]?\s*(.{0,40}?)\s*Account\s*[⇲⟫»]?/iu', $line, $m) && preg_match('/Account/iu', $line) && !str_contains($line, ':')) {
+            $flush();
+            $svc = trim($m[1]);
+            $cur = ['service' => ($svc !== '' ? $svc : 'Unknown'), 'user' => '', 'pass' => '', 'exp' => '', 'created' => ''];
+            continue;
+        }
+
+        if ($cur === null) $cur = ['service' => 'Unknown', 'user' => '', 'pass' => '', 'exp' => '', 'created' => ''];
+
+        if (preg_match('/^(Username|Remarks|User)\s*:\s*(.+)$/i', $line, $m)) { $cur['user'] = trim($m[2]); continue; }
+        if (preg_match('/^Password\s*:\s*(.+)$/i', $line, $m)) { $cur['pass'] = trim($m[1]); continue; }
+        if (preg_match('/^(Expired On|Expired|Expiry)\s*:\s*(.+)$/i', $line, $m)) { $cur['exp'] = trim($m[2]); continue; }
+        if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $m)) { $cur['created'] = $m[1]; continue; }
+    }
+    $flush();
+
+    // newest first
+    return array_reverse($rows);
 }
 
 // ============ account management (mirrors the CLI scripts' exact commands) ============

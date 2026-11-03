@@ -42,6 +42,7 @@
     services: function () { return api('services'); },
     accounts: function (svc) { return api('accounts', { svc: svc }); },
     xrayDetail: function () { return api('xray_detail'); },
+    createdUsers: function (q) { return api('created_users', { q: q || '' }); },
     logs: function (lines, src) { return api('logs', { lines: lines || 100, src: src || 'user' }); },
     changelog: function () { return api('changelog'); },
 

@@ -1106,6 +1106,11 @@
   (function () {
     if (!window.VPSAPI || !window.VPSAPI.available) {
       showBanner(false);
+      // demo mode: the user/password button still works with sample records
+      var dUser = $('#createdUsersBtn');
+      if (dUser) dUser.addEventListener('click', function () {
+        toast('Demo: senarai user sebenar hanya tersedia melalui panel (nginx)', 'warn');
+      });
       return;
     }
     showBanner(true);
@@ -1361,6 +1366,139 @@
       lastDrawerOpen = open;
     });
     drawerObserver.observe(drawerEl, { attributes: true, attributeFilter: ['class'] });
+
+    /* ---- Created users (username + password) modal ---- */
+    var usersModal = $('#usersModal');
+    var usersScrim = $('#usersScrim');
+    var usersBody = $('#usersBody');
+    var usersEmpty = $('#usersEmpty');
+    var usersCount = $('#usersCount');
+    var usersSearch = $('#usersSearch');
+    var usersTrap = null;
+    var usersOpener = null;
+    var usersCache = [];
+    var revealed = {};
+
+    function eyeBtn(user) {
+      return '<button class="users-pass__toggle" type="button" data-reveal="' + escHtml(user) +
+        '" aria-label="Tunjuk/sembunyi password" title="Tunjuk/sembunyi">' +
+        '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+        '<path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="1.6"/></svg></button>';
+    }
+
+    function renderUsers(rows) {
+      usersCache = rows || [];
+      var q = (usersSearch.value || '').trim().toLowerCase();
+      var list = usersCache.filter(function (r) {
+        return !q || (r.user || '').toLowerCase().indexOf(q) !== -1;
+      });
+
+      usersCount.textContent = list.length + ' akaun';
+      usersEmpty.hidden = list.length > 0;
+      usersBody.innerHTML = list.map(function (r) {
+        var user = r.user || '—';
+        var pass = r.pass || '';
+        var masked = !revealed[user];
+        var passCell = pass
+          ? '<span class="users-pass"><span class="users-pass__val mono' + (masked ? ' users-pass__val--masked' : '') + '">' +
+            (masked ? '••••••••' : escHtml(pass)) + '</span>' + eyeBtn(user) + '</span>'
+          : '<span class="dim">—</span>';
+        return '<tr>' +
+          '<td><span class="svc-tag">' + escHtml(r.service || '—') + '</span></td>' +
+          '<td><span class="acc-user__name mono">' + escHtml(user) + '</span></td>' +
+          '<td>' + passCell + '</td>' +
+          '<td><span class="mono dim">' + escHtml(r.exp || '—') + '</span></td>' +
+          '<td><button class="row-btn" type="button" data-copyuser="' + escHtml(user) + '" data-copypass="' + escHtml(pass) + '" aria-label="Copy" title="Copy user:pass">' +
+          '<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/></svg></button></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function loadCreatedUsers() {
+      usersBody.innerHTML = '<tr><td colspan="5" class="dim" style="padding:1rem">Memuat…</td></tr>';
+      API.createdUsers('').then(function (r) {
+        renderUsers(r.users || []);
+      }).catch(function (err) {
+        usersCache = [];
+        renderUsers([]);
+        toast(err.message || 'Gagal baca rekod user', 'warn');
+      });
+    }
+
+    function openUsers(trigger) {
+      usersOpener = trigger || document.activeElement;
+      usersScrim.hidden = false;
+      usersModal.removeAttribute('inert');
+      usersModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('is-locked');
+      void usersModal.offsetWidth;
+      usersScrim.classList.add('is-open');
+      usersModal.classList.add('is-open');
+      usersSearch.value = '';
+      usersTrap = trapFocusModal(usersModal);
+      document.addEventListener('keydown', usersTrap, true);
+      loadCreatedUsers();
+      $('#usersSearch').focus();
+    }
+
+    function closeUsers() {
+      if (!usersModal.classList.contains('is-open')) return;
+      usersModal.classList.remove('is-open');
+      usersScrim.classList.remove('is-open');
+      usersModal.setAttribute('aria-hidden', 'true');
+      usersModal.setAttribute('inert', '');
+      if (usersTrap) document.removeEventListener('keydown', usersTrap, true);
+      usersTrap = null;
+      window.setTimeout(function () { if (!usersModal.classList.contains('is-open')) usersScrim.hidden = true; }, 200);
+      if (!drawerEl.classList.contains('is-open') && !$('#updateModal').classList.contains('is-open')) {
+        document.body.classList.remove('is-locked');
+      }
+      if (usersOpener && document.contains(usersOpener)) usersOpener.focus();
+    }
+
+    // minimal focus trap for this modal
+    function trapFocusModal(root) {
+      return function (e) {
+        if (e.key !== 'Tab') return;
+        var list = $$('a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])', root)
+          .filter(function (el) { return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement; });
+        if (!list.length) return;
+        var first = list[0], last = list[list.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first || !root.contains(document.activeElement)) { e.preventDefault(); last.focus(); }
+        } else if (document.activeElement === last || !root.contains(document.activeElement)) {
+          e.preventDefault(); first.focus();
+        }
+      };
+    }
+
+    $('#createdUsersBtn').addEventListener('click', function (e) { openUsers(e.currentTarget); });
+    $('#usersClose').addEventListener('click', closeUsers);
+    $('#usersDone').addEventListener('click', closeUsers);
+    usersScrim.addEventListener('click', closeUsers);
+    $('#usersRefresh').addEventListener('click', loadCreatedUsers);
+    usersSearch.addEventListener('input', function () { renderUsers(usersCache); });
+
+    usersBody.addEventListener('click', function (e) {
+      var eye = e.target.closest('[data-reveal]');
+      if (eye) {
+        var u = eye.getAttribute('data-reveal');
+        revealed[u] = !revealed[u];
+        renderUsers(usersCache);
+        return;
+      }
+      var cp = e.target.closest('[data-copyuser]');
+      if (cp) {
+        var text = cp.getAttribute('data-copyuser') + (cp.getAttribute('data-copypass') ? ':' + cp.getAttribute('data-copypass') : '');
+        copyText(text).then(function () { toast('Copied user:pass', 'info'); }).catch(function () {});
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && usersModal.classList.contains('is-open')) {
+        e.preventDefault(); closeUsers();
+      }
+    }, true);
 
     function loadAccountsForVisible() {
       var seen = {};

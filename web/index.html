@@ -362,6 +362,10 @@
           <h2 class="panel__title" id="menu-title">Remaining menu</h2>
         </div>
         <span class="mono dim">select a number · same as terminal</span>
+        <button class="btn btn--tiny" type="button" id="createdUsersBtn">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 13V3h9l3 3v7z"/><path d="M5 7h6M5 10h4"/></svg>
+          User &amp; Password
+        </button>
       </header>
 
       <div class="menu-list">
@@ -607,6 +611,42 @@
 </div>
 
 <div class="toaster" id="toaster" role="status" aria-live="polite" aria-atomic="false"></div>
+
+<!-- ============ CREATED USERS MODAL ============ -->
+<div class="scrim" id="usersScrim" hidden></div>
+<div class="modal modal--wide" id="usersModal" role="dialog" aria-modal="true" aria-labelledby="usersTitle" aria-hidden="true" tabindex="-1" inert>
+  <header class="modal__head">
+    <div>
+      <p class="eyebrow"><span class="eyebrow__bracket">[</span>USERS<span class="eyebrow__bracket">]</span></p>
+      <h2 class="modal__title" id="usersTitle">User &amp; Password dicipta</h2>
+    </div>
+    <button class="icon-btn" type="button" id="usersClose" aria-label="Tutup senarai user">
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>
+    </button>
+  </header>
+  <div class="modal__body">
+    <div class="users-search">
+      <input class="cmd__input mono" id="usersSearch" type="search" placeholder="cari username…" aria-label="Cari user" autocomplete="off">
+      <span class="mono dim" id="usersCount">0 akaun</span>
+    </div>
+    <div class="table-wrap users-table-wrap">
+      <table class="acc-table">
+        <thead>
+          <tr><th scope="col">Service</th><th scope="col">Username</th><th scope="col">Password</th><th scope="col">Expired</th><th scope="col"><span class="visually-hidden">Copy</span></th></tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="usersEmpty" hidden>
+      <p class="empty__title">Tiada rekod</p>
+      <p class="empty__body">Belum ada user dicipta, atau log tidak dapat dibaca.</p>
+    </div>
+  </div>
+  <footer class="modal__foot">
+    <button class="btn btn--ghost" type="button" id="usersRefresh">Muat semula</button>
+    <button class="btn btn--primary" type="button" id="usersDone">Tutup</button>
+  </footer>
+</div>
 
 <!-- ============ NUMBER PROMPT (CLI-style menu selection) ============ -->
 <div class="num-prompt" id="numPrompt" hidden>

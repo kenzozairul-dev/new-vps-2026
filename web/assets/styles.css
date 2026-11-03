@@ -1516,6 +1516,30 @@ kbd {
 .xlogin__file { font-size: .72rem; color: var(--text-dim); word-break: break-all; }
 .xlogin__none { font-size: .72rem; color: var(--text-faint); }
 
+/* =============================================================================
+   CREATED USERS MODAL
+   ========================================================================== */
+.modal--wide { width: min(94vw, 760px); }
+.users-search {
+  display: flex; align-items: center; gap: .8rem; margin-bottom: .8rem;
+}
+.users-search .cmd__input { flex: 1; }
+.users-table-wrap { max-height: 52vh; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.users-table-wrap .acc-table thead th { position: sticky; top: 0; background: var(--surface-2); z-index: 1; }
+.users-pass { display: inline-flex; align-items: center; gap: .4rem; }
+.users-pass__val { font-size: .82rem; }
+.users-pass__val--masked { letter-spacing: .12em; color: var(--text-faint); }
+.users-pass__toggle {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--text-faint); display: inline-flex;
+}
+.users-pass__toggle:hover { color: var(--text); }
+.svc-tag {
+  font-size: .66rem; letter-spacing: .05em; padding: .14rem .42rem; border-radius: 5px;
+  border: 1px solid var(--border-strong); color: var(--text-dim); background: var(--surface-3);
+  white-space: nowrap;
+}
+
 
 
 
