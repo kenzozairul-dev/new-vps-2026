@@ -1461,6 +1461,29 @@ kbd {
   50%      { box-shadow: 0 0 0 5px rgba(61,220,151,0); }
 }
 
+/* =============================================================================
+   NUMBER PROMPT — CLI-style "Select menu :" fast dispatch
+   ========================================================================== */
+.num-prompt {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  z-index: 150;
+  display: flex; align-items: center; gap: .1rem;
+  padding: .62rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 40%), var(--surface-2);
+  box-shadow: 0 18px 60px rgba(0,0,0,.5);
+  animation: modalIn .18s ease;
+}
+.num-prompt[hidden] { display: none; }
+.num-prompt__label { font-size: .86rem; color: var(--text-dim); }
+.num-prompt__val { font-size: .95rem; color: var(--info); font-weight: 650; min-width: .5em; }
+.num-prompt__cursor {
+  color: var(--info); font-size: .95rem;
+  animation: cursorBlink 1.05s steps(1) infinite;
+}
+@keyframes cursorBlink { 0%,50% { opacity: 1; } 50.01%,100% { opacity: 0; } }
+
 
 
 

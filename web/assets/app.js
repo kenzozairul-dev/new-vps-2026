@@ -991,6 +991,99 @@
     });
   });
 
+  /* ---------------------------------------------------------------- number dispatch (CLI-style) */
+  // press digits anywhere (outside inputs) -> "Select menu :" prompt; Enter runs it.
+  var numPrompt = $('#numPrompt');
+  var numPromptVal = $('#numPromptVal');
+  var numBuf = '';
+  var numTimer = null;
+
+  var SERVICE_BY_NUM = {
+    '1': 'ssh', '2': 'xray', '3': 'trojan', '4': 'wireguard',
+    '5': 'sstp', '6': 'l2tp', '7': 'shadowsocks'
+  };
+
+  function numPromptOpen() {
+    numPrompt.hidden = false;
+  }
+  function numPromptClose() {
+    numPrompt.hidden = true;
+    numBuf = '';
+    numPromptVal.textContent = '';
+    window.clearTimeout(numTimer);
+  }
+  function numPromptRender() {
+    numPromptVal.textContent = numBuf;
+  }
+
+  function dispatchNumber(n) {
+    numPromptClose();
+    var svc = SERVICE_BY_NUM[n];
+    if (svc) {
+      var card = document.querySelector('.svc-card[data-service="' + svc + '"]');
+      if (card) { openDrawer(svc, card); }
+      else { toast('Servis ' + n + ' tiada', 'warn'); }
+      return;
+    }
+    if (n === '999') {
+      openModal(document.getElementById('menuUpdate'));
+      return;
+    }
+    var item = document.querySelector('.menu-item[data-menu="' + n + '"]');
+    if (item) {
+      if (n === '66') {
+        var logEl = $('#logStream');
+        logEl.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+        logEl.focus({ preventScroll: true });
+      }
+      toast('Opening menu ' + n + ' — ' + item.getAttribute('data-label') + ' (simulated)', 'info');
+      return;
+    }
+    toast('Tiada menu ' + n, 'warn');
+  }
+
+  document.addEventListener('keydown', function (e) {
+    // ignore when typing in a real input/textarea or when a modal/drawer is open
+    var t = e.target;
+    var typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+    if (typing) return;
+    if (modal.classList.contains('is-open') || drawer.classList.contains('is-open')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+      if (numPrompt.hidden) { numBuf = ''; numPromptOpen(); }
+      numBuf += e.key;
+      // cap length; dispatch immediately on single-digit service keys (1-7)
+      if (numBuf.length > 3) numBuf = numBuf.slice(-3);
+      numPromptRender();
+      window.clearTimeout(numTimer);
+      if (/^[1-7]$/.test(numBuf)) {
+        // give a beat for a second digit (e.g. 55), then auto-run service keys
+        numTimer = window.setTimeout(function () { dispatchNumber(numBuf); }, 900);
+      }
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      if (!numPrompt.hidden && numBuf !== '') { e.preventDefault(); dispatchNumber(numBuf); }
+      return;
+    }
+    if (e.key === 'Backspace') {
+      if (!numPrompt.hidden && numBuf !== '') {
+        e.preventDefault();
+        numBuf = numBuf.slice(0, -1);
+        numPromptRender();
+        if (numBuf === '') numPromptClose();
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      if (!numPrompt.hidden) { e.preventDefault(); numPromptClose(); }
+      return;
+    }
+  }, true);
+
   /* expose a tiny hook for automated visual checks */
   window.__VPS_MENU__ = {
     services: SERVICES,
